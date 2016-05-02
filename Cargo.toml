@@ -1,0 +1,21 @@
+[package]
+name = "maman"
+version = "0.1.0"
+authors = ["Laurent Arnoud <laurent@spkdev.net>"]
+description = "Rust Web Crawler"
+repository = "https://github.com/spk/maman.git"
+homepage = "https://github.com/spk/maman"
+keywords = ["web", "crawler", "spider"]
+license = "MIT"
+readme = "README.md"
+
+[dependencies]
+hyper = "0.9.1"
+html5ever = "0.5.3"
+tendril = "0.2.2"
+string_cache = "0.2.11"
+url = "1.0"
+redis = "0.5.2"
+rustc-serialize = "0.3.18"
+time = "0.1.34"
+rand = "0.3"
