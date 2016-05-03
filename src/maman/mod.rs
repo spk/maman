@@ -40,6 +40,7 @@ impl ToJson for Page {
         let mut root = BTreeMap::new();
         let mut object = BTreeMap::new();
         let mut args = Vec::new();
+        let now = now_utc().to_timespec().sec;
         object.insert("url".to_string(), self.url.to_string().to_json());
         object.insert("document".to_string(), self.document.to_json());
         object.insert("headers".to_string(), self.headers.to_json());
@@ -48,10 +49,8 @@ impl ToJson for Page {
         root.insert("retry".to_string(), true.to_json());
         root.insert("args".to_string(), args.to_json());
         root.insert("jid".to_string(), self.jid.to_json());
-        root.insert("created_at".to_string(),
-                    now_utc().to_timespec().sec.to_json());
-        root.insert("enqueued_at".to_string(),
-                    now_utc().to_timespec().sec.to_json());
+        root.insert("created_at".to_string(), now.to_json());
+        root.insert("enqueued_at".to_string(), now.to_json());
         Json::Object(root)
     }
 }
