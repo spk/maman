@@ -19,6 +19,12 @@ Pages are send to list `<MAMAN_ENV>:queue:maman` using
 }
 ```
 
+## Installation
+
+~~~
+cargo install maman
+~~~
+
 ## Usage
 
 ~~~
