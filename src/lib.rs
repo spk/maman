@@ -13,6 +13,3 @@ extern crate rand;
 
 mod maman;
 pub use maman::{Spider, Page};
-
-#[cfg(test)]
-mod tests;

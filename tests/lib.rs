@@ -1,7 +1,12 @@
+extern crate url;
+extern crate time;
+extern crate maman;
+extern crate rustc_serialize;
+
+use maman::{Spider, Page};
 use std::env;
 use std::collections::BTreeMap;
 use url::Url;
-use super::{Spider, Page};
 
 fn visit_page(input: &str) -> Spider {
     env::set_var("MAMAN_ENV", "test");
