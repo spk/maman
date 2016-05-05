@@ -10,6 +10,7 @@ extern crate redis;
 extern crate rustc_serialize;
 extern crate time;
 extern crate rand;
+extern crate robotparser;
 
 mod maman;
 pub use maman::{Spider, Page};

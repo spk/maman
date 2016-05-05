@@ -1,5 +1,6 @@
 extern crate url;
 extern crate time;
+#[macro_use]
 extern crate maman;
 extern crate rustc_serialize;
 
@@ -86,7 +87,7 @@ fn test_json_job_format() {
         object.insert("document".to_string(), input.to_json());
         object.insert("headers".to_string(), headers.to_json());
         args.push(object);
-        root.insert("class".to_string(), "Maman".to_json());
+        root.insert("class".to_string(), maman_name!().to_json());
         root.insert("retry".to_string(), true.to_json());
         root.insert("args".to_string(), args.to_json());
         root.insert("jid".to_string(), page.jid.to_json());

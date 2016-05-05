@@ -9,22 +9,41 @@ use rand::{Rng, thread_rng};
 use time::now_utc;
 use tendril::SliceExt;
 use url::{Url, ParseError};
-use hyper::header::Connection;
+use hyper::header::UserAgent;
 use hyper::Client as HyperClient;
 use hyper::client::Response as HttpResponse;
+use robotparser::RobotFileParser;
 use redis::Client as RedisClient;
 use redis::{Commands, RedisResult};
 use rustc_serialize::json::{ToJson, Json};
 use html5ever::tokenizer::{TokenSink, Token, TagToken, Tokenizer};
 
+#[macro_export]
+macro_rules! maman_name {
+    () => ( "Maman" )
+}
+#[macro_export]
+macro_rules! maman_version {
+    () => ( env!("CARGO_PKG_VERSION") )
+}
+#[macro_export]
+macro_rules! maman_version_string {
+    () => ( concat!(maman_name!(), " v", maman_version!()) )
+}
+#[macro_export]
+macro_rules! maman_user_agent {
+    () => ( concat!(maman_version_string!(), " (https://crates.io/crates/maman)") )
+}
+
 const MAMAN_ENV: &'static str = "MAMAN_ENV";
 
-pub struct Spider {
+pub struct Spider<'a> {
     pub base_url: String,
     pub visited_urls: Vec<Url>,
     pub unvisited_urls: Vec<Url>,
     pub env: String,
     pub redis_queue_name: String,
+    robot_parser: RobotFileParser<'a>,
 }
 
 pub struct Page {
@@ -45,7 +64,7 @@ impl ToJson for Page {
         object.insert("document".to_string(), self.document.to_json());
         object.insert("headers".to_string(), self.headers.to_json());
         args.push(object);
-        root.insert("class".to_string(), "Maman".to_json());
+        root.insert("class".to_string(), maman_name!().to_json());
         root.insert("retry".to_string(), true.to_json());
         root.insert("args".to_string(), args.to_json());
         root.insert("jid".to_string(), self.jid.to_json());
@@ -137,16 +156,19 @@ impl Page {
     }
 }
 
-impl Spider {
-    pub fn new(base_url: String) -> Spider {
+impl<'a> Spider<'a> {
+    pub fn new(base_url: String) -> Spider<'a> {
         let maman_env = env::var(&MAMAN_ENV.to_string()).unwrap_or("development".to_string());
         let redis_queue_name = format!("{}:{}:{}", maman_env, "queue", "maman");
+        let robots_txt = format!("{}/{}", base_url, "robots.txt");
+        let robot_parser = RobotFileParser::new(robots_txt);
         Spider {
             base_url: base_url,
             visited_urls: Vec::new(),
             unvisited_urls: Vec::new(),
             env: maman_env,
             redis_queue_name: redis_queue_name,
+            robot_parser: robot_parser,
         }
     }
 
@@ -158,25 +180,20 @@ impl Spider {
         &self.visited_urls
     }
 
-    pub fn read_response(&self, page_url: &str, mut response: HttpResponse) -> Option<Page> {
-        match Url::parse(page_url) {
-            Ok(u) => {
-                let mut headers = BTreeMap::new();
-                {
-                    for h in response.headers.iter() {
-                        headers.insert(h.name().to_ascii_lowercase(), h.value_string());
-                    }
-                }
-                let mut document = String::new();
-                // handle CharsError::NotUtf8
-                match response.read_to_string(&mut document) {
-                    Ok(_) => {
-                        let page = Page::new(u, document.to_string(), headers.clone());
-                        let read = self.read_page(page, &document).unwrap();
-                        Some(read)
-                    }
-                    Err(_) => None,
-                }
+    pub fn read_response(&self, page_url: Url, mut response: HttpResponse) -> Option<Page> {
+        let mut headers = BTreeMap::new();
+        {
+            for h in response.headers.iter() {
+                headers.insert(h.name().to_ascii_lowercase(), h.value_string());
+            }
+        }
+        let mut document = String::new();
+        // handle CharsError::NotUtf8
+        match response.read_to_string(&mut document) {
+            Ok(_) => {
+                let page = Page::new(page_url, document.to_string(), headers.clone());
+                let read = self.read_page(page, &document).unwrap();
+                Some(read)
             }
             Err(_) => None,
         }
@@ -202,13 +219,25 @@ impl Spider {
         }
     }
 
+    fn can_visit(&self, page_url: Url) -> bool {
+        self.robot_parser.can_fetch(maman_name!(), page_url.path())
+    }
+
     pub fn visit(&mut self, page_url: &str, response: HttpResponse) {
-        if let Some(page) = self.read_response(page_url, response) {
-            self.visit_page(page);
+        match Url::parse(page_url) {
+            Ok(u) => {
+                if self.can_visit(u.clone()) {
+                    if let Some(page) = self.read_response(u, response) {
+                        self.visit_page(page);
+                    }
+                }
+            },
+            Err(_) => {},
         }
     }
 
     pub fn crawl(&mut self) {
+        self.robot_parser.read();
         let base_url = self.base_url.clone();
         if let Some(response) = self.load_url(&base_url) {
             self.visit(&base_url, response);
@@ -233,8 +262,8 @@ impl Spider {
 
     fn load_url(&self, url: &str) -> Option<HttpResponse> {
         let client = HyperClient::new();
-        let res = client.get(url).header(Connection::close()).send();
-        match res {
+        let request = client.get(url).header(UserAgent(maman_user_agent!().to_owned()));
+        match request.send() {
             Ok(response) => Some(response),
             Err(_) => None,
         }
