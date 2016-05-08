@@ -28,7 +28,7 @@ cargo install maman
 ## Usage
 
 ~~~
-maman URL
+REDIS_URL="redis://localhost/" maman URL
 ~~~
 
 ## LICENSE

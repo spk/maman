@@ -14,7 +14,8 @@ use hyper::Client as HyperClient;
 use hyper::client::Response as HttpResponse;
 use robotparser::RobotFileParser;
 use redis::Client as RedisClient;
-use redis::{Commands, RedisResult};
+use redis::Connection as RedisConnection;
+use redis::{Commands, RedisResult, parse_redis_url};
 use rustc_serialize::json::{ToJson, Json};
 use html5ever::tokenizer::{TokenSink, Token, TagToken, Tokenizer};
 
@@ -42,6 +43,7 @@ pub struct Spider<'a> {
     pub visited_urls: Vec<Url>,
     pub unvisited_urls: Vec<Url>,
     pub env: String,
+    redis: RedisConnection,
     pub redis_queue_name: String,
     robot_parser: RobotFileParser<'a>,
 }
@@ -167,6 +169,7 @@ impl<'a> Spider<'a> {
             visited_urls: Vec::new(),
             unvisited_urls: Vec::new(),
             env: maman_env,
+            redis: Spider::redis_connection(),
             redis_queue_name: redis_queue_name,
             robot_parser: robot_parser,
         }
@@ -219,10 +222,6 @@ impl<'a> Spider<'a> {
         }
     }
 
-    fn can_visit(&self, page_url: Url) -> bool {
-        self.robot_parser.can_fetch(maman_name!(), page_url.path())
-    }
-
     pub fn visit(&mut self, page_url: &str, response: HttpResponse) {
         match Url::parse(page_url) {
             Ok(u) => {
@@ -231,8 +230,8 @@ impl<'a> Spider<'a> {
                         self.visit_page(page);
                     }
                 }
-            },
-            Err(_) => {},
+            }
+            Err(_) => {}
         }
     }
 
@@ -252,10 +251,18 @@ impl<'a> Spider<'a> {
         }
     }
 
+    fn can_visit(&self, page_url: Url) -> bool {
+        self.robot_parser.can_fetch(maman_name!(), page_url.path())
+    }
+
+    fn redis_connection() -> RedisConnection {
+        let redis_url = &env::var("REDIS_URL").unwrap_or("redis://localhost/".to_owned());
+        let url = parse_redis_url(redis_url).unwrap();
+        RedisClient::open(url).unwrap().get_connection().unwrap()
+    }
+
     fn send_to_redis(&self, page: Page) -> RedisResult<()> {
-        let client = try!(RedisClient::open("redis://127.0.0.1/"));
-        let connection = try!(client.get_connection());
-        let _: () = try!(connection.lpush(self.redis_queue_name.to_string(), page.to_json()));
+        let _: () = try!(self.redis.lpush(self.redis_queue_name.to_string(), page.to_json()));
 
         Ok(())
     }
