@@ -19,6 +19,10 @@ Pages are send to list `<MAMAN_ENV>:queue:maman` using
 }
 ```
 
+## Dependencies
+
+* Redis
+
 ## Installation
 
 ~~~
@@ -28,7 +32,7 @@ cargo install maman
 ## Usage
 
 ~~~
-REDIS_URL="redis://localhost/" maman URL
+REDIS_URL="redis://127.0.0.1/" maman URL
 ~~~
 
 ## LICENSE

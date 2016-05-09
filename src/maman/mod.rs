@@ -256,7 +256,7 @@ impl<'a> Spider<'a> {
     }
 
     fn redis_connection() -> RedisConnection {
-        let redis_url = &env::var("REDIS_URL").unwrap_or("redis://localhost/".to_owned());
+        let redis_url = &env::var("REDIS_URL").unwrap_or("redis://127.0.0.1/".to_owned());
         let url = parse_redis_url(redis_url).unwrap();
         RedisClient::open(url).unwrap().get_connection().unwrap()
     }
