@@ -5,6 +5,7 @@ extern crate maman;
 extern crate rustc_serialize;
 
 use maman::{Spider, Page};
+
 use std::env;
 use std::collections::BTreeMap;
 use url::Url;
@@ -68,32 +69,16 @@ fn test_redis_queue_name() {
 
 #[test]
 fn test_json_job_format() {
-    use time::now_utc;
-    use rustc_serialize::json::{ToJson, Json};
-
     env::set_var("MAMAN_ENV", "test");
     let input = "<html><body><a href='/todo#new' /><a href='/new' /></html>";
     let url = Url::parse("http://example.net/").unwrap();
     let mut headers = BTreeMap::new();
     headers.insert("content-type".to_string(), "text/html".to_string());
     let page = Page::new(url.clone(), input.to_string(), headers.clone());
-
-    let object = {
-        let mut root = BTreeMap::new();
-        let mut object = BTreeMap::new();
-        let mut args = Vec::new();
-        let now = now_utc().to_timespec().sec;
-        object.insert("url".to_string(), url.to_string().to_json());
-        object.insert("document".to_string(), input.to_json());
-        object.insert("headers".to_string(), headers.to_json());
-        args.push(object);
-        root.insert("class".to_string(), maman_name!().to_json());
-        root.insert("retry".to_string(), true.to_json());
-        root.insert("args".to_string(), args.to_json());
-        root.insert("jid".to_string(), page.jid.to_json());
-        root.insert("created_at".to_string(), now.to_json());
-        root.insert("enqueued_at".to_string(), now.to_json());
-        Json::Object(root)
-    };
-    assert_eq!(page.to_json(), object);
+    let page_serialize = page.serialized();
+    let job = page.to_job();
+    assert_eq!(job.class, maman_name!());
+    assert_eq!(job.retry, 25);
+    assert_eq!(job.queue, maman_name!().to_string().to_lowercase());
+    assert_eq!(job.args, page_serialize);
 }

@@ -13,4 +13,4 @@ extern crate rand;
 extern crate robotparser;
 
 mod maman;
-pub use maman::{Spider, Page};
+pub use maman::{Spider, Page, Job};

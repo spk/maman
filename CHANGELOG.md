@@ -1,4 +1,9 @@
 
+n.n.n / unreleased
+==================
+
+  * Move job logic from Page to Job
+
 0.2.0 / 2016-05-09
 ==================
 

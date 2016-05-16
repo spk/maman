@@ -53,26 +53,76 @@ pub struct Page {
     pub document: String,
     pub headers: BTreeMap<String, String>,
     pub urls: Vec<Url>,
+}
+
+#[derive(RustcEncodable, RustcDecodable, Debug)]
+pub struct Job {
+    pub class: String,
+    pub args: String,
+    pub retry: i64,
+    pub queue: String,
     pub jid: String,
+    pub created_at: i64,
+    pub enqueued_at: i64,
+}
+
+impl Default for JobOpts {
+    fn default() -> JobOpts {
+        let now = now_utc().to_timespec().sec;
+        let jid = thread_rng().gen_ascii_chars().take(24).collect::<String>();
+        JobOpts {
+            retry: 25,
+            queue: "default".to_string(),
+            jid: jid,
+            created_at: now,
+            enqueued_at: now,
+        }
+    }
+}
+
+pub struct JobOpts {
+    pub retry: i64,
+    pub queue: String,
+    pub jid: String,
+    pub created_at: i64,
+    pub enqueued_at: i64,
+}
+
+impl Job {
+    pub fn new(class: String, args: String, opts: JobOpts) -> Job {
+        Job {
+            class: class,
+            args: args,
+            retry: opts.retry,
+            queue: opts.queue,
+            jid: opts.jid,
+            created_at: opts.created_at,
+            enqueued_at: opts.enqueued_at,
+        }
+    }
+}
+
+impl ToJson for Job {
+    fn to_json(&self) -> Json {
+        let mut object = BTreeMap::new();
+        object.insert("class".to_string(), self.class.to_json());
+        object.insert("args".to_string(), Json::from_str(&self.args).unwrap());
+        object.insert("retry".to_string(), self.retry.to_json());
+        object.insert("queue".to_string(), self.queue.to_json());
+        object.insert("jid".to_string(), self.jid.to_json());
+        object.insert("created_at".to_string(), self.created_at.to_json());
+        object.insert("enqueued_at".to_string(), self.enqueued_at.to_json());
+        Json::Object(object)
+    }
 }
 
 impl ToJson for Page {
     fn to_json(&self) -> Json {
-        let mut root = BTreeMap::new();
         let mut object = BTreeMap::new();
-        let mut args = Vec::new();
-        let now = now_utc().to_timespec().sec;
         object.insert("url".to_string(), self.url.to_string().to_json());
         object.insert("document".to_string(), self.document.to_json());
         object.insert("headers".to_string(), self.headers.to_json());
-        args.push(object);
-        root.insert("class".to_string(), maman_name!().to_json());
-        root.insert("retry".to_string(), true.to_json());
-        root.insert("args".to_string(), args.to_json());
-        root.insert("jid".to_string(), self.jid.to_json());
-        root.insert("created_at".to_string(), now.to_json());
-        root.insert("enqueued_at".to_string(), now.to_json());
-        Json::Object(root)
+        Json::Object(object)
     }
 }
 
@@ -103,14 +153,26 @@ impl TokenSink for Page {
 
 impl Page {
     pub fn new(url: Url, document: String, headers: BTreeMap<String, String>) -> Page {
-        let jid = thread_rng().gen_ascii_chars().take(24).collect::<String>();
         Page {
             url: url,
             document: document,
             headers: headers,
             urls: Vec::new(),
-            jid: jid,
         }
+    }
+
+    pub fn to_job(&self) -> Job {
+        let job_opts = JobOpts {
+            queue: maman_name!().to_string().to_lowercase(),
+            ..Default::default()
+        };
+        Job::new(maman_name!().to_string(), self.serialized(), job_opts)
+    }
+
+    pub fn serialized(&self) -> String {
+        let mut args = Vec::new();
+        args.push(self.to_json());
+        args.to_json().to_string()
     }
 
     fn parsed_url(&self, url: &str) -> Option<Url> {
@@ -214,11 +276,11 @@ impl<'a> Spider<'a> {
         for u in page.urls.iter() {
             self.add_unvisited_url(u.clone());
         }
-        match self.send_to_redis(page) {
+        match self.send_to_redis(page.to_job()) {
             Err(err) => {
                 println!("Redis {}: {}", err.category(), err.description());
             }
-            Ok(()) => {}
+            Ok(_) => {}
         }
     }
 
@@ -261,10 +323,10 @@ impl<'a> Spider<'a> {
         RedisClient::open(url).unwrap().get_connection().unwrap()
     }
 
-    fn send_to_redis(&self, page: Page) -> RedisResult<()> {
-        let _: () = try!(self.redis.lpush(self.redis_queue_name.to_string(), page.to_json()));
+    fn send_to_redis(&self, job: Job) -> RedisResult<Job> {
+        let _: () = try!(self.redis.lpush(self.redis_queue_name.to_string(), job.to_json()));
 
-        Ok(())
+        Ok(job)
     }
 
     fn load_url(&self, url: &str) -> Option<HttpResponse> {
