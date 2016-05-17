@@ -12,6 +12,7 @@ use url::{Url, ParseError};
 use hyper::header::UserAgent;
 use hyper::Client as HyperClient;
 use hyper::client::Response as HttpResponse;
+use hyper::status::StatusCode;
 use robotparser::RobotFileParser;
 use redis::Client as RedisClient;
 use redis::Connection as RedisConnection;
@@ -333,7 +334,12 @@ impl<'a> Spider<'a> {
         let client = HyperClient::new();
         let request = client.get(url).header(UserAgent(maman_user_agent!().to_owned()));
         match request.send() {
-            Ok(response) => Some(response),
+            Ok(response) => {
+                match response.status {
+                    StatusCode::Ok | StatusCode::NotModified => Some(response),
+                    _ => None,
+                }
+            }
             Err(_) => None,
         }
     }

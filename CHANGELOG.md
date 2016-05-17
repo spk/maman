@@ -2,6 +2,7 @@
 n.n.n / unreleased
 ==================
 
+  * Only follow StatusCode::Ok and StatusCode::NotModified
   * Move job logic from Page to Job
 
 0.2.0 / 2016-05-09
