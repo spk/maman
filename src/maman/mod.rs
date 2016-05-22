@@ -5,8 +5,6 @@ use std::ascii::AsciiExt;
 use std::default::Default;
 use std::collections::BTreeMap;
 
-use rand::{Rng, thread_rng};
-use time::now_utc;
 use tendril::SliceExt;
 use url::{Url, ParseError};
 use hyper::header::UserAgent;
@@ -14,11 +12,11 @@ use hyper::Client as HyperClient;
 use hyper::client::Response as HttpResponse;
 use hyper::status::StatusCode;
 use robotparser::RobotFileParser;
-use redis::Client as RedisClient;
-use redis::Connection as RedisConnection;
-use redis::{Commands, RedisResult, parse_redis_url};
 use rustc_serialize::json::{ToJson, Json};
 use html5ever::tokenizer::{TokenSink, Token, TagToken, Tokenizer};
+use sidekiq::Client as SidekiqClient;
+use sidekiq::ClientOpts as SidekiqClientOpts;
+use sidekiq::{Job, JobOpts, create_redis_pool};
 
 #[macro_export]
 macro_rules! maman_name {
@@ -44,8 +42,7 @@ pub struct Spider<'a> {
     pub visited_urls: Vec<Url>,
     pub unvisited_urls: Vec<Url>,
     pub env: String,
-    redis: RedisConnection,
-    pub redis_queue_name: String,
+    sidekiq: SidekiqClient,
     robot_parser: RobotFileParser<'a>,
 }
 
@@ -54,67 +51,6 @@ pub struct Page {
     pub document: String,
     pub headers: BTreeMap<String, String>,
     pub urls: Vec<Url>,
-}
-
-#[derive(RustcEncodable, RustcDecodable, Debug)]
-pub struct Job {
-    pub class: String,
-    pub args: String,
-    pub retry: i64,
-    pub queue: String,
-    pub jid: String,
-    pub created_at: i64,
-    pub enqueued_at: i64,
-}
-
-impl Default for JobOpts {
-    fn default() -> JobOpts {
-        let now = now_utc().to_timespec().sec;
-        let jid = thread_rng().gen_ascii_chars().take(24).collect::<String>();
-        JobOpts {
-            retry: 25,
-            queue: "default".to_string(),
-            jid: jid,
-            created_at: now,
-            enqueued_at: now,
-        }
-    }
-}
-
-pub struct JobOpts {
-    pub retry: i64,
-    pub queue: String,
-    pub jid: String,
-    pub created_at: i64,
-    pub enqueued_at: i64,
-}
-
-impl Job {
-    pub fn new(class: String, args: String, opts: JobOpts) -> Job {
-        Job {
-            class: class,
-            args: args,
-            retry: opts.retry,
-            queue: opts.queue,
-            jid: opts.jid,
-            created_at: opts.created_at,
-            enqueued_at: opts.enqueued_at,
-        }
-    }
-}
-
-impl ToJson for Job {
-    fn to_json(&self) -> Json {
-        let mut object = BTreeMap::new();
-        object.insert("class".to_string(), self.class.to_json());
-        object.insert("args".to_string(), Json::from_str(&self.args).unwrap());
-        object.insert("retry".to_string(), self.retry.to_json());
-        object.insert("queue".to_string(), self.queue.to_json());
-        object.insert("jid".to_string(), self.jid.to_json());
-        object.insert("created_at".to_string(), self.created_at.to_json());
-        object.insert("enqueued_at".to_string(), self.enqueued_at.to_json());
-        Json::Object(object)
-    }
 }
 
 impl ToJson for Page {
@@ -224,16 +160,19 @@ impl Page {
 impl<'a> Spider<'a> {
     pub fn new(base_url: String) -> Spider<'a> {
         let maman_env = env::var(&MAMAN_ENV.to_string()).unwrap_or("development".to_string());
-        let redis_queue_name = format!("{}:{}:{}", maman_env, "queue", "maman");
         let robots_txt = format!("{}/{}", base_url, "robots.txt");
         let robot_parser = RobotFileParser::new(robots_txt);
+        let client_opts = SidekiqClientOpts {
+            namespace: Some(maman_env.to_string()),
+            ..Default::default()
+        };
+        let sidekiq = SidekiqClient::new(create_redis_pool(), client_opts);
         Spider {
             base_url: base_url,
             visited_urls: Vec::new(),
             unvisited_urls: Vec::new(),
+            sidekiq: sidekiq,
             env: maman_env,
-            redis: Spider::redis_connection(),
-            redis_queue_name: redis_queue_name,
             robot_parser: robot_parser,
         }
     }
@@ -277,7 +216,7 @@ impl<'a> Spider<'a> {
         for u in page.urls.iter() {
             self.add_unvisited_url(u.clone());
         }
-        match self.send_to_redis(page.to_job()) {
+        match self.sidekiq.push(page.to_job()) {
             Err(err) => {
                 println!("Redis {}: {}", err.category(), err.description());
             }
@@ -316,18 +255,6 @@ impl<'a> Spider<'a> {
 
     fn can_visit(&self, page_url: Url) -> bool {
         self.robot_parser.can_fetch(maman_name!(), page_url.path())
-    }
-
-    fn redis_connection() -> RedisConnection {
-        let redis_url = &env::var("REDIS_URL").unwrap_or("redis://127.0.0.1/".to_owned());
-        let url = parse_redis_url(redis_url).unwrap();
-        RedisClient::open(url).unwrap().get_connection().unwrap()
-    }
-
-    fn send_to_redis(&self, job: Job) -> RedisResult<Job> {
-        let _: () = try!(self.redis.lpush(self.redis_queue_name.to_string(), job.to_json()));
-
-        Ok(job)
     }
 
     fn load_url(&self, url: &str) -> Option<HttpResponse> {

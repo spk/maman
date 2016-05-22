@@ -61,13 +61,6 @@ fn test_other_domain_link() {
 }
 
 #[test]
-fn test_redis_queue_name() {
-    env::set_var("MAMAN_ENV", "test");
-    let spider = Spider::new("http://example.net/".to_string());
-    assert_eq!(spider.redis_queue_name, "test:queue:maman");
-}
-
-#[test]
 fn test_json_job_format() {
     env::set_var("MAMAN_ENV", "test");
     let input = "<html><body><a href='/todo#new' /><a href='/new' /></html>";

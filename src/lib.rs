@@ -11,6 +11,7 @@ extern crate rustc_serialize;
 extern crate time;
 extern crate rand;
 extern crate robotparser;
+extern crate sidekiq;
 
 mod maman;
-pub use maman::{Spider, Page, Job};
+pub use maman::{Spider, Page};

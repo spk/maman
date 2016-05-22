@@ -4,6 +4,7 @@ n.n.n / unreleased
 
   * Only follow StatusCode::Ok and StatusCode::NotModified
   * Move job logic from Page to Job
+  * Use rust-sidekiq
 
 0.2.0 / 2016-05-09
 ==================
