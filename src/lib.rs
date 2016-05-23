@@ -6,10 +6,7 @@ extern crate tendril;
 extern crate html5ever;
 extern crate url;
 extern crate hyper;
-extern crate redis;
 extern crate rustc_serialize;
-extern crate time;
-extern crate rand;
 extern crate robotparser;
 extern crate sidekiq;
 

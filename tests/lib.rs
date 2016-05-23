@@ -1,8 +1,6 @@
 extern crate url;
-extern crate time;
 #[macro_use]
 extern crate maman;
-extern crate rustc_serialize;
 
 use maman::{Spider, Page};
 
