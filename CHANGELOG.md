@@ -1,5 +1,5 @@
 
-n.n.n / unreleased
+0.3.0 / 2016-05-29
 ==================
 
   * Only follow StatusCode::Ok and StatusCode::NotModified

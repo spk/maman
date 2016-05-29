@@ -1,6 +1,6 @@
 [package]
 name = "maman"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Laurent Arnoud <laurent@spkdev.net>"]
 description = "Rust Web Crawler"
 repository = "https://github.com/spk/maman.git"
