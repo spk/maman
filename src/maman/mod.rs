@@ -181,25 +181,6 @@ impl<'a> Spider<'a> {
         }
     }
 
-    pub fn read_response(&self, page_url: String, mut response: HttpResponse) -> Option<Page> {
-        let mut headers = BTreeMap::new();
-        {
-            for h in response.headers.iter() {
-                headers.insert(h.name().to_ascii_lowercase(), h.value_string());
-            }
-        }
-        let mut document = String::new();
-        // handle CharsError::NotUtf8
-        match response.read_to_string(&mut document) {
-            Ok(_) => {
-                let page = Page::new(page_url, document.to_string(), headers.clone());
-                let read = Spider::read_page(page, &document).unwrap();
-                Some(read)
-            }
-            Err(_) => None,
-        }
-    }
-
     pub fn visit_page(&mut self, page: Page) {
         self.visited_urls.push(page.url.clone());
         for u in page.urls.iter() {
@@ -210,19 +191,6 @@ impl<'a> Spider<'a> {
                 println!("Redis {}: {}", err.category(), err.description());
             }
             Ok(_) => {}
-        }
-    }
-
-    pub fn visit(&mut self, page_url: &str, response: HttpResponse) {
-        match Url::parse(page_url) {
-            Ok(u) => {
-                if self.can_visit(u.clone()) {
-                    if let Some(page) = self.read_response(u.to_string(), response) {
-                        self.visit_page(page);
-                    }
-                }
-            }
-            Err(_) => {}
         }
     }
 
@@ -242,15 +210,47 @@ impl<'a> Spider<'a> {
         }
     }
 
-    fn can_visit(&self, page_url: Url) -> bool {
-        self.robot_parser.can_fetch(maman_name!(), page_url.path())
-    }
-
     pub fn read_page(page: Page, document: &str) -> Tokenizer<Page> {
         let mut tok = Tokenizer::new(page, Default::default());
         tok.feed(document.to_tendril());
         tok.end();
         tok
+    }
+
+    fn visit(&mut self, page_url: &str, response: HttpResponse) {
+        match Url::parse(page_url) {
+            Ok(u) => {
+                if self.can_visit(u.clone()) {
+                    if let Some(page) = Spider::read_response(u.to_string(), response) {
+                        self.visit_page(page);
+                    }
+                }
+            }
+            Err(_) => {}
+        }
+    }
+
+    fn can_visit(&self, page_url: Url) -> bool {
+        self.robot_parser.can_fetch(maman_name!(), page_url.path())
+    }
+
+    fn read_response(page_url: String, mut response: HttpResponse) -> Option<Page> {
+        let mut headers = BTreeMap::new();
+        {
+            for h in response.headers.iter() {
+                headers.insert(h.name().to_ascii_lowercase(), h.value_string());
+            }
+        }
+        let mut document = String::new();
+        // handle CharsError::NotUtf8
+        match response.read_to_string(&mut document) {
+            Ok(_) => {
+                let page = Page::new(page_url, document.to_string(), headers.clone());
+                let read = Spider::read_page(page, &document).unwrap();
+                Some(read)
+            }
+            Err(_) => None,
+        }
     }
 
     fn load_url(url: &str) -> Option<HttpResponse> {
