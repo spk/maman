@@ -39,24 +39,24 @@ const MAMAN_ENV: &'static str = "MAMAN_ENV";
 
 pub struct Spider<'a> {
     pub base_url: String,
-    pub visited_urls: Vec<Url>,
-    pub unvisited_urls: Vec<Url>,
+    pub visited_urls: Vec<String>,
+    pub unvisited_urls: Vec<String>,
     pub env: String,
     sidekiq: SidekiqClient,
     robot_parser: RobotFileParser<'a>,
 }
 
 pub struct Page {
-    pub url: Url,
+    pub url: String,
     pub document: String,
     pub headers: BTreeMap<String, String>,
-    pub urls: Vec<Url>,
+    pub urls: Vec<String>,
 }
 
 impl ToJson for Page {
     fn to_json(&self) -> Json {
         let mut object = BTreeMap::new();
-        object.insert("url".to_string(), self.url.to_string().to_json());
+        object.insert("url".to_string(), self.url.to_json());
         object.insert("document".to_string(), self.document.to_json());
         object.insert("headers".to_string(), self.headers.to_json());
         Json::Object(object)
@@ -73,7 +73,7 @@ impl TokenSink for Page {
                             if attr.name.local.to_string() == "href" {
                                 match self.can_enqueue(&attr.value) {
                                     Some(u) => {
-                                        self.urls.push(u);
+                                        self.urls.push(u.to_string());
                                     }
                                     None => {}
                                 }
@@ -89,7 +89,7 @@ impl TokenSink for Page {
 }
 
 impl Page {
-    pub fn new(url: Url, document: String, headers: BTreeMap<String, String>) -> Page {
+    pub fn new(url: String, document: String, headers: BTreeMap<String, String>) -> Self {
         Page {
             url: url,
             document: document,
@@ -112,16 +112,16 @@ impl Page {
         args.to_json().to_string()
     }
 
-    fn parsed_url(&self, url: &str) -> Option<Url> {
+    fn normalize_url(&self, url: &str) -> Option<Url> {
         match Url::parse(url) {
             Ok(u) => Some(u),
-            Err(ParseError::RelativeUrlWithoutBase) => Some(self.url.join(url).unwrap()),
+            Err(ParseError::RelativeUrlWithoutBase) => Some(self.parsed_url().join(url).unwrap()),
             Err(_) => None,
         }
     }
 
-    fn parsed_url_without_fragment(&self, url: &str) -> Option<Url> {
-        match self.parsed_url(url) {
+    fn url_without_fragment(&self, url: &str) -> Option<Url> {
+        match self.normalize_url(url) {
             Some(mut u) => {
                 u.set_fragment(None);
                 Some(u)
@@ -130,16 +130,20 @@ impl Page {
         }
     }
 
+    fn parsed_url(&self) -> Url {
+        Url::parse(&self.url).unwrap()
+    }
+
     fn url_eq(&self, url: &Url) -> bool {
-        self.url == *url
+        self.parsed_url() == *url
     }
 
     fn domain_eq(&self, url: &Url) -> bool {
-        self.url.domain() == url.domain()
+        self.parsed_url().domain() == url.domain()
     }
 
     fn can_enqueue(&self, url: &str) -> Option<Url> {
-        match self.parsed_url_without_fragment(url) {
+        match self.url_without_fragment(url) {
             Some(u) => {
                 match u.scheme() {
                     "http" | "https" => {
@@ -177,15 +181,7 @@ impl<'a> Spider<'a> {
         }
     }
 
-    pub fn is_visited(&self, url: &Url) -> bool {
-        self.visited_urls.contains(url)
-    }
-
-    pub fn visited_urls(&self) -> &Vec<Url> {
-        &self.visited_urls
-    }
-
-    pub fn read_response(&self, page_url: Url, mut response: HttpResponse) -> Option<Page> {
+    pub fn read_response(&self, page_url: String, mut response: HttpResponse) -> Option<Page> {
         let mut headers = BTreeMap::new();
         {
             for h in response.headers.iter() {
@@ -197,24 +193,17 @@ impl<'a> Spider<'a> {
         match response.read_to_string(&mut document) {
             Ok(_) => {
                 let page = Page::new(page_url, document.to_string(), headers.clone());
-                let read = self.read_page(page, &document).unwrap();
+                let read = Spider::read_page(page, &document).unwrap();
                 Some(read)
             }
             Err(_) => None,
         }
     }
 
-    pub fn read_page(&self, page: Page, document: &str) -> Tokenizer<Page> {
-        let mut tok = Tokenizer::new(page, Default::default());
-        tok.feed(document.to_tendril());
-        tok.end();
-        tok
-    }
-
     pub fn visit_page(&mut self, page: Page) {
-        self.add_visited_url(page.url.clone());
+        self.visited_urls.push(page.url.clone());
         for u in page.urls.iter() {
-            self.add_unvisited_url(u.clone());
+            self.unvisited_urls.push(u.clone());
         }
         match self.sidekiq.push(page.to_job()) {
             Err(err) => {
@@ -228,7 +217,7 @@ impl<'a> Spider<'a> {
         match Url::parse(page_url) {
             Ok(u) => {
                 if self.can_visit(u.clone()) {
-                    if let Some(page) = self.read_response(u, response) {
+                    if let Some(page) = self.read_response(u.to_string(), response) {
                         self.visit_page(page);
                     }
                 }
@@ -240,12 +229,12 @@ impl<'a> Spider<'a> {
     pub fn crawl(&mut self) {
         self.robot_parser.read();
         let base_url = self.base_url.clone();
-        if let Some(response) = self.load_url(&base_url) {
+        if let Some(response) = Spider::load_url(&base_url) {
             self.visit(&base_url, response);
             while let Some(url) = self.unvisited_urls.pop() {
-                if !self.is_visited(&url) {
+                if !self.visited_urls.contains(&url) {
                     let url_ser = &url.to_string();
-                    if let Some(response) = self.load_url(url_ser) {
+                    if let Some(response) = Spider::load_url(url_ser) {
                         self.visit(url_ser, response);
                     }
                 }
@@ -257,7 +246,14 @@ impl<'a> Spider<'a> {
         self.robot_parser.can_fetch(maman_name!(), page_url.path())
     }
 
-    fn load_url(&self, url: &str) -> Option<HttpResponse> {
+    pub fn read_page(page: Page, document: &str) -> Tokenizer<Page> {
+        let mut tok = Tokenizer::new(page, Default::default());
+        tok.feed(document.to_tendril());
+        tok.end();
+        tok
+    }
+
+    fn load_url(url: &str) -> Option<HttpResponse> {
         let client = HyperClient::new();
         let request = client.get(url).header(UserAgent(maman_user_agent!().to_owned()));
         match request.send() {
@@ -269,13 +265,5 @@ impl<'a> Spider<'a> {
             }
             Err(_) => None,
         }
-    }
-
-    fn add_visited_url(&mut self, url: Url) {
-        self.visited_urls.push(url);
-    }
-
-    fn add_unvisited_url(&mut self, url: Url) {
-        self.unvisited_urls.push(url);
     }
 }
