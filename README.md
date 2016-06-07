@@ -13,6 +13,8 @@ Pages are send to list `<MAMAN_ENV>:queue:maman` using
 "created_at": 1461789979, "enqueued_at": 1461789979,
 "args": {
     "document":"<html><body><a href='#' /><a href='/new' /></html>",
+    "urls": ["http://example.net/new"],
+    "extra": [],
     "headers": {"content-type": "text/html"},
     "url": "http://example.net/"
     }

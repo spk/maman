@@ -41,6 +41,7 @@ pub struct Spider<'a> {
     pub base_url: String,
     pub visited_urls: Vec<String>,
     pub unvisited_urls: Vec<String>,
+    pub extra: Vec<String>,
     pub env: String,
     sidekiq: SidekiqClient,
     robot_parser: RobotFileParser<'a>,
@@ -51,6 +52,7 @@ pub struct Page {
     pub document: String,
     pub headers: BTreeMap<String, String>,
     pub urls: Vec<String>,
+    pub extra: Vec<String>,
 }
 
 impl ToJson for Page {
@@ -59,6 +61,8 @@ impl ToJson for Page {
         object.insert("url".to_string(), self.url.to_json());
         object.insert("document".to_string(), self.document.to_json());
         object.insert("headers".to_string(), self.headers.to_json());
+        object.insert("urls".to_string(), self.urls.to_json());
+        object.insert("extra".to_string(), self.extra.to_json());
         Json::Object(object)
     }
 }
@@ -89,20 +93,23 @@ impl TokenSink for Page {
 }
 
 impl Page {
-    pub fn new(url: String, document: String, headers: BTreeMap<String, String>) -> Self {
+    pub fn new(url: String,
+               document: String,
+               headers: BTreeMap<String, String>,
+               extra: Vec<String>)
+               -> Self {
         Page {
             url: url,
             document: document,
             headers: headers,
             urls: Vec::new(),
+            extra: extra,
         }
     }
 
     pub fn to_job(&self) -> Job {
-        let job_opts = JobOpts {
-            queue: maman_name!().to_string().to_lowercase(),
-            ..Default::default()
-        };
+        let job_opts =
+            JobOpts { queue: maman_name!().to_string().to_lowercase(), ..Default::default() };
         Job::new(maman_name!().to_string(), self.serialized(), job_opts)
     }
 
@@ -162,19 +169,18 @@ impl Page {
 }
 
 impl<'a> Spider<'a> {
-    pub fn new(base_url: String) -> Spider<'a> {
+    pub fn new(base_url: String, extra: Vec<String>) -> Spider<'a> {
         let maman_env = env::var(&MAMAN_ENV.to_string()).unwrap_or("development".to_string());
         let robots_txt = format!("{}/{}", base_url, "robots.txt");
         let robot_parser = RobotFileParser::new(robots_txt);
-        let client_opts = SidekiqClientOpts {
-            namespace: Some(maman_env.to_string()),
-            ..Default::default()
-        };
+        let client_opts =
+            SidekiqClientOpts { namespace: Some(maman_env.to_string()), ..Default::default() };
         let sidekiq = SidekiqClient::new(create_redis_pool(), client_opts);
         Spider {
             base_url: base_url,
             visited_urls: Vec::new(),
             unvisited_urls: Vec::new(),
+            extra: extra,
             sidekiq: sidekiq,
             env: maman_env,
             robot_parser: robot_parser,
@@ -221,7 +227,9 @@ impl<'a> Spider<'a> {
         match Url::parse(page_url) {
             Ok(u) => {
                 if self.can_visit(u.clone()) {
-                    if let Some(page) = Spider::read_response(u.to_string(), response) {
+                    if let Some(page) = Spider::read_response(u.to_string(),
+                                                              response,
+                                                              self.extra.clone()) {
                         self.visit_page(page);
                     }
                 }
@@ -234,7 +242,10 @@ impl<'a> Spider<'a> {
         self.robot_parser.can_fetch(maman_name!(), page_url.path())
     }
 
-    fn read_response(page_url: String, mut response: HttpResponse) -> Option<Page> {
+    fn read_response(page_url: String,
+                     mut response: HttpResponse,
+                     extra: Vec<String>)
+                     -> Option<Page> {
         let mut headers = BTreeMap::new();
         {
             for h in response.headers.iter() {
@@ -245,7 +256,7 @@ impl<'a> Spider<'a> {
         // handle CharsError::NotUtf8
         match response.read_to_string(&mut document) {
             Ok(_) => {
-                let page = Page::new(page_url, document.to_string(), headers.clone());
+                let page = Page::new(page_url, document.to_string(), headers.clone(), extra);
                 let read = Spider::read_page(page, &document).unwrap();
                 Some(read)
             }

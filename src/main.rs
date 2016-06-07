@@ -17,6 +17,6 @@ fn main() {
         }
     };
 
-    let mut spider = Spider::new(url);
+    let mut spider = Spider::new(url, vec![]);
     spider.crawl()
 }

@@ -10,8 +10,8 @@ use std::collections::BTreeMap;
 fn visit_page(input: &str) -> Spider {
     env::set_var("MAMAN_ENV", "test");
     let url = "http://example.net/";
-    let mut spider = Spider::new(url.to_string());
-    let page = Page::new(url.to_string(), input.to_string(), BTreeMap::new());
+    let mut spider = Spider::new(url.to_string(), vec![]);
+    let page = Page::new(url.to_string(), input.to_string(), BTreeMap::new(), vec![]);
     let tok = Spider::read_page(page, input);
     spider.visit_page(tok.unwrap());
     spider
@@ -64,7 +64,7 @@ fn test_json_job_format() {
     let url = "http://example.net/".to_string();
     let mut headers = BTreeMap::new();
     headers.insert("content-type".to_string(), "text/html".to_string());
-    let page = Page::new(url, input.to_string(), headers.clone());
+    let page = Page::new(url, input.to_string(), headers.clone(), vec![]);
     let page_serialize = page.serialized();
     let job = page.to_job();
     assert_eq!(job.class, maman_name!());
