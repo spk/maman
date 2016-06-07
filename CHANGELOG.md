@@ -1,4 +1,12 @@
 
+0.4.0 / 2016-06-07
+==================
+
+  * Add urls and extra to Page
+  * Move and fix private public functions
+  * Use String instead of Url and cleanup
+  * Update sidekiq to v0.1.2
+
 0.3.0 / 2016-05-29
 ==================
 
