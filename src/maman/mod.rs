@@ -43,6 +43,7 @@ pub struct Spider<'a> {
     pub unvisited_urls: Vec<String>,
     pub extra: Vec<String>,
     pub env: String,
+    pub limit: isize,
     sidekiq: SidekiqClient,
     robot_parser: RobotFileParser<'a>,
 }
@@ -169,7 +170,7 @@ impl Page {
 }
 
 impl<'a> Spider<'a> {
-    pub fn new(base_url: String, extra: Vec<String>) -> Spider<'a> {
+    pub fn new(base_url: String, limit: isize, extra: Vec<String>) -> Spider<'a> {
         let maman_env = env::var(&MAMAN_ENV.to_string()).unwrap_or("development".to_string());
         let robots_txt = format!("{}/{}", base_url, "robots.txt");
         let robot_parser = RobotFileParser::new(robots_txt);
@@ -184,6 +185,7 @@ impl<'a> Spider<'a> {
             sidekiq: sidekiq,
             env: maman_env,
             robot_parser: robot_parser,
+            limit: limit,
         }
     }
 
@@ -206,11 +208,15 @@ impl<'a> Spider<'a> {
         if let Some(response) = Spider::load_url(&base_url) {
             self.visit(&base_url, response);
             while let Some(url) = self.unvisited_urls.pop() {
-                if !self.visited_urls.contains(&url) {
-                    let url_ser = &url.to_string();
-                    if let Some(response) = Spider::load_url(url_ser) {
-                        self.visit(url_ser, response);
+                if self.limit == 0 || (self.visited_urls.len() as isize) < self.limit {
+                    if !self.visited_urls.contains(&url) {
+                        let url_ser = &url.to_string();
+                        if let Some(response) = Spider::load_url(url_ser) {
+                            self.visit(url_ser, response);
+                        }
                     }
+                } else {
+                    break;
                 }
             }
         }

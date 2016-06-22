@@ -34,8 +34,10 @@ cargo install maman
 ## Usage
 
 ~~~
-REDIS_URL="redis://127.0.0.1/" maman URL
+REDIS_URL="redis://127.0.0.1/" maman URL [LIMIT]
 ~~~
+
+`LIMIT` must be an interger or `0` is the default, meaning no limit.
 
 ## LICENSE
 

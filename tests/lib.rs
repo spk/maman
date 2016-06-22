@@ -10,7 +10,7 @@ use std::collections::BTreeMap;
 fn visit_page(input: &str) -> Spider {
     env::set_var("MAMAN_ENV", "test");
     let url = "http://example.net/";
-    let mut spider = Spider::new(url.to_string(), vec![]);
+    let mut spider = Spider::new(url.to_string(), 0, vec![]);
     let page = Page::new(url.to_string(), input.to_string(), BTreeMap::new(), vec![]);
     let tok = Spider::read_page(page, input);
     spider.visit_page(tok.unwrap());
