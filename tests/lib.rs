@@ -65,10 +65,10 @@ fn test_json_job_format() {
     let mut headers = BTreeMap::new();
     headers.insert("content-type".to_string(), "text/html".to_string());
     let page = Page::new(url, input.to_string(), headers.clone(), vec![]);
-    let page_serialize = page.serialized();
+    let page_object = page.as_object();
     let job = page.to_job();
     assert_eq!(job.class, maman_name!());
     assert_eq!(job.retry, 25);
     assert_eq!(job.queue, maman_name!().to_string().to_lowercase());
-    assert_eq!(job.args, page_serialize);
+    assert_eq!(job.args, vec![page_object]);
 }

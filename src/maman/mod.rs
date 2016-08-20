@@ -12,11 +12,12 @@ use hyper::Client as HyperClient;
 use hyper::client::Response as HttpResponse;
 use hyper::status::StatusCode;
 use robotparser::RobotFileParser;
-use rustc_serialize::json::{ToJson, Json};
 use html5ever::tokenizer::{TokenSink, Token, TagToken, Tokenizer};
 use sidekiq::Client as SidekiqClient;
 use sidekiq::ClientOpts as SidekiqClientOpts;
 use sidekiq::{Job, JobOpts, create_redis_pool};
+use serde_json::value::Value;
+use serde_json::builder::ObjectBuilder;
 
 #[macro_export]
 macro_rules! maman_name {
@@ -54,18 +55,6 @@ pub struct Page {
     pub headers: BTreeMap<String, String>,
     pub urls: Vec<String>,
     pub extra: Vec<String>,
-}
-
-impl ToJson for Page {
-    fn to_json(&self) -> Json {
-        let mut object = BTreeMap::new();
-        object.insert("url".to_string(), self.url.to_json());
-        object.insert("document".to_string(), self.document.to_json());
-        object.insert("headers".to_string(), self.headers.to_json());
-        object.insert("urls".to_string(), self.urls.to_json());
-        object.insert("extra".to_string(), self.extra.to_json());
-        Json::Object(object)
-    }
 }
 
 impl TokenSink for Page {
@@ -111,13 +100,17 @@ impl Page {
     pub fn to_job(&self) -> Job {
         let job_opts =
             JobOpts { queue: maman_name!().to_string().to_lowercase(), ..Default::default() };
-        Job::new(maman_name!().to_string(), self.serialized(), job_opts)
+        Job::new(maman_name!().to_string(), vec![self.as_object()], job_opts)
     }
 
-    pub fn serialized(&self) -> String {
-        let mut args = Vec::new();
-        args.push(self.to_json());
-        args.to_json().to_string()
+    pub fn as_object(&self) -> Value {
+        ObjectBuilder::new()
+            .insert("url".to_string(), &self.url)
+            .insert("document".to_string(), &self.document)
+            .insert("headers".to_string(), &self.headers)
+            .insert("urls".to_string(), &self.urls)
+            .insert("extra".to_string(), &self.extra)
+            .build()
     }
 
     fn normalize_url(&self, url: &str) -> Option<Url> {
