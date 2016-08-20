@@ -1,4 +1,11 @@
 
+0.5.0 / 2016-08-20
+==================
+
+  * Fix sidekiq push error display
+  * Update url and sidekiq move to serde
+  * Add LIMIT option
+
 0.4.0 / 2016-06-07
 ==================
 
