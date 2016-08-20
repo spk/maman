@@ -1,6 +1,5 @@
 use std::env;
 use std::io::Read;
-use std::error::Error;
 use std::ascii::AsciiExt;
 use std::default::Default;
 use std::collections::BTreeMap;
@@ -189,7 +188,7 @@ impl<'a> Spider<'a> {
         }
         match self.sidekiq.push(page.to_job()) {
             Err(err) => {
-                println!("Redis {}: {}", err.category(), err.description());
+                println!("SidekiqClient push failed: {}", err);
             }
             Ok(_) => {}
         }
