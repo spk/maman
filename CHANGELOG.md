@@ -1,4 +1,10 @@
 
+0.5.1 / 2016-08-21
+==================
+
+  * Dont follow redirect on crawling
+  * Add rustfmt.toml config
+
 0.5.0 / 2016-08-20
 ==================
 
