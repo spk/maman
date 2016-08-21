@@ -8,6 +8,7 @@ use tendril::SliceExt;
 use url::{Url, ParseError};
 use hyper::header::UserAgent;
 use hyper::Client as HyperClient;
+use hyper::client::RedirectPolicy;
 use hyper::client::Response as HttpResponse;
 use hyper::status::StatusCode;
 use robotparser::RobotFileParser;
@@ -263,7 +264,8 @@ impl<'a> Spider<'a> {
     }
 
     fn load_url(url: &str) -> Option<HttpResponse> {
-        let client = HyperClient::new();
+        let mut client = HyperClient::new();
+        client.set_redirect_policy(RedirectPolicy::FollowNone);
         let request = client.get(url).header(UserAgent(maman_user_agent!().to_owned()));
         match request.send() {
             Ok(response) => {
