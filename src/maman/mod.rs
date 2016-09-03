@@ -18,6 +18,8 @@ use sidekiq::ClientOpts as SidekiqClientOpts;
 use sidekiq::{Job, JobOpts, create_redis_pool};
 use serde_json::value::Value;
 use serde_json::builder::ObjectBuilder;
+use encoding::{Encoding, DecoderTrap};
+use encoding::all::UTF_8;
 
 #[macro_export]
 macro_rules! maman_name {
@@ -251,12 +253,12 @@ impl<'a> Spider<'a> {
                 headers.insert(h.name().to_ascii_lowercase(), h.value_string());
             }
         }
-        let mut document = String::new();
-        // handle CharsError::NotUtf8
-        match response.read_to_string(&mut document) {
-            Ok(_) => {
-                let page = Page::new(page_url, document.to_string(), headers.clone(), extra);
-                let read = Spider::read_page(page, &document).unwrap();
+        let mut document = vec![];
+        let _ = response.read_to_end(&mut document);
+        match UTF_8.decode(&document, DecoderTrap::Ignore) {
+            Ok(doc) => {
+                let page = Page::new(page_url, doc.to_string(), headers.clone(), extra);
+                let read = Spider::read_page(page, &doc).unwrap();
                 Some(read)
             }
             Err(_) => None,

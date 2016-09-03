@@ -10,6 +10,7 @@ extern crate serde;
 extern crate serde_json;
 extern crate robotparser;
 extern crate sidekiq;
+extern crate encoding;
 
 mod maman;
 pub use maman::{Spider, Page};
