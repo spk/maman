@@ -23,7 +23,7 @@ Pages are send to list `<MAMAN_ENV>:queue:maman` using
 
 ## Dependencies
 
-* Redis
+* [Redis](http://redis.io/)
 
 ## Installation
 
@@ -34,10 +34,15 @@ cargo install maman
 ## Usage
 
 ~~~
-REDIS_URL="redis://127.0.0.1/" maman URL [LIMIT]
+maman URL [LIMIT]
 ~~~
 
 `LIMIT` must be an interger or `0` is the default, meaning no limit.
+
+## Default environment variables
+
+* MAMAN_ENV=development
+* REDIS_URL="redis://127.0.0.1/"
 
 ## LICENSE
 
