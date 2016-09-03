@@ -1,4 +1,11 @@
 
+0.6.0 / 2016-09-03
+==================
+
+  * Fix robots.txt path from base_url
+  * Use encoding crate
+  * Update robotparser to 0.5.0
+
 0.5.1 / 2016-08-21
 ==================
 
