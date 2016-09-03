@@ -167,8 +167,8 @@ impl Page {
 impl<'a> Spider<'a> {
     pub fn new(base_url: String, limit: isize, extra: Vec<String>) -> Spider<'a> {
         let maman_env = env::var(&MAMAN_ENV.to_string()).unwrap_or("development".to_string());
-        let robots_txt = format!("{}/{}", base_url, "robots.txt");
-        let robot_parser = RobotFileParser::new(robots_txt);
+        let robots_txt = Url::parse(&base_url).unwrap().join("/robots.txt").unwrap();
+        let robot_file_parser = RobotFileParser::new(robots_txt);
         let client_opts =
             SidekiqClientOpts { namespace: Some(maman_env.to_string()), ..Default::default() };
         let sidekiq = SidekiqClient::new(create_redis_pool(), client_opts);
@@ -179,7 +179,7 @@ impl<'a> Spider<'a> {
             extra: extra,
             sidekiq: sidekiq,
             env: maman_env,
-            robot_parser: robot_parser,
+            robot_parser: robot_file_parser,
             limit: limit,
         }
     }
