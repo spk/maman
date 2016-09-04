@@ -1,0 +1,121 @@
+use std::default::Default;
+use std::collections::BTreeMap;
+
+use url::{Url, ParseError};
+use sidekiq::{Job, JobOpts};
+use serde_json::value::Value;
+use serde_json::builder::ObjectBuilder;
+use html5ever::tokenizer::{TokenSink, Token, TagToken};
+
+pub struct Page {
+    pub url: String,
+    pub document: String,
+    pub headers: BTreeMap<String, String>,
+    pub urls: Vec<String>,
+    pub extra: Vec<String>,
+}
+
+impl TokenSink for Page {
+    fn process_token(&mut self, token: Token) {
+        match token {
+            TagToken(tag) => {
+                match tag.name {
+                    atom!("a") => {
+                        for attr in tag.attrs.iter() {
+                            if attr.name.local.to_string() == "href" {
+                                match self.can_enqueue(&attr.value) {
+                                    Some(u) => {
+                                        self.urls.push(u.to_string());
+                                    }
+                                    None => {}
+                                }
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+impl Page {
+    pub fn new(url: String,
+               document: String,
+               headers: BTreeMap<String, String>,
+               extra: Vec<String>)
+               -> Self {
+        Page {
+            url: url,
+            document: document,
+            headers: headers,
+            urls: Vec::new(),
+            extra: extra,
+        }
+    }
+
+    pub fn to_job(&self) -> Job {
+        let job_opts =
+            JobOpts { queue: maman_name!().to_string().to_lowercase(), ..Default::default() };
+        Job::new(maman_name!().to_string(), vec![self.as_object()], job_opts)
+    }
+
+    pub fn as_object(&self) -> Value {
+        ObjectBuilder::new()
+            .insert("url".to_string(), &self.url)
+            .insert("document".to_string(), &self.document)
+            .insert("headers".to_string(), &self.headers)
+            .insert("urls".to_string(), &self.urls)
+            .insert("extra".to_string(), &self.extra)
+            .build()
+    }
+
+    fn normalize_url(&self, url: &str) -> Option<Url> {
+        match Url::parse(url) {
+            Ok(u) => Some(u),
+            Err(ParseError::RelativeUrlWithoutBase) => Some(self.parsed_url().join(url).unwrap()),
+            Err(_) => None,
+        }
+    }
+
+    fn url_without_fragment(&self, url: &str) -> Option<Url> {
+        match self.normalize_url(url) {
+            Some(mut u) => {
+                u.set_fragment(None);
+                Some(u)
+            }
+            None => None,
+        }
+    }
+
+    fn parsed_url(&self) -> Url {
+        Url::parse(&self.url).unwrap()
+    }
+
+    fn url_eq(&self, url: &Url) -> bool {
+        self.parsed_url() == *url
+    }
+
+    fn domain_eq(&self, url: &Url) -> bool {
+        self.parsed_url().domain() == url.domain()
+    }
+
+    fn can_enqueue(&self, url: &str) -> Option<Url> {
+        match self.url_without_fragment(url) {
+            Some(u) => {
+                match u.scheme() {
+                    "http" | "https" => {
+                        if !self.url_eq(&u) && self.domain_eq(&u) {
+                            Some(u)
+                        } else {
+                            None
+                        }
+                    }
+                    _ => None,
+                }
+            }
+            None => None,
+        }
+    }
+}
