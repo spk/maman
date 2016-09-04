@@ -1,5 +1,5 @@
 use std::env;
-use std::io::Read;
+use std::io::{Read, Write};
 use std::ascii::AsciiExt;
 use std::default::Default;
 use std::collections::BTreeMap;
@@ -23,6 +23,13 @@ pub use self::page::Page;
 mod page;
 
 const MAMAN_ENV: &'static str = "MAMAN_ENV";
+
+macro_rules! println_err(
+    ($($arg:tt)*) => { {
+        let r = writeln!(&mut ::std::io::stderr(), $($arg)*);
+        r.expect("failed printing to stderr");
+    } }
+    );
 
 pub struct Spider<'a> {
     pub base_url: Url,
@@ -62,7 +69,7 @@ impl<'a> Spider<'a> {
         }
         match self.sidekiq.push(page.to_job()) {
             Err(err) => {
-                println!("SidekiqClient push failed: {}", err);
+                println_err!("SidekiqClient push failed: {}", err);
             }
             Ok(_) => {}
         }
