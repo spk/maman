@@ -1,18 +1,32 @@
 #[macro_use]
 extern crate maman;
+extern crate url;
 
 use std::env;
 use std::process;
 
+use url::Url;
 use maman::Spider;
+
+fn print_usage() {
+    println!(maman_version_string!());
+    println!("Usage: maman URL [LIMIT]");
+}
 
 #[cfg(not(test))]
 fn main() {
     let url = match env::args().nth(1) {
-        Some(url) => url,
+        Some(url) => {
+            match Url::parse(url.as_ref()) {
+                Ok(u) => u,
+                Err(_) => {
+                    print_usage();
+                    process::exit(1);
+                }
+            }
+        }
         None => {
-            println!(maman_version_string!());
-            println!("Usage: maman URL [LIMIT]");
+            print_usage();
             process::exit(1);
         }
     };

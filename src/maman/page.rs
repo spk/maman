@@ -8,10 +8,10 @@ use serde_json::builder::ObjectBuilder;
 use html5ever::tokenizer::{TokenSink, Token, TagToken};
 
 pub struct Page {
-    pub url: String,
+    pub url: Url,
     pub document: String,
     pub headers: BTreeMap<String, String>,
-    pub urls: Vec<String>,
+    pub urls: Vec<Url>,
     pub extra: Vec<String>,
 }
 
@@ -25,7 +25,7 @@ impl TokenSink for Page {
                             if attr.name.local.to_string() == "href" {
                                 match self.can_enqueue(&attr.value) {
                                     Some(u) => {
-                                        self.urls.push(u.to_string());
+                                        self.urls.push(u);
                                     }
                                     None => {}
                                 }
@@ -41,7 +41,7 @@ impl TokenSink for Page {
 }
 
 impl Page {
-    pub fn new(url: String,
+    pub fn new(url: Url,
                document: String,
                headers: BTreeMap<String, String>,
                extra: Vec<String>)
@@ -74,7 +74,7 @@ impl Page {
     fn normalize_url(&self, url: &str) -> Option<Url> {
         match Url::parse(url) {
             Ok(u) => Some(u),
-            Err(ParseError::RelativeUrlWithoutBase) => Some(self.parsed_url().join(url).unwrap()),
+            Err(ParseError::RelativeUrlWithoutBase) => Some(self.url.join(url).unwrap()),
             Err(_) => None,
         }
     }
@@ -89,16 +89,12 @@ impl Page {
         }
     }
 
-    fn parsed_url(&self) -> Url {
-        Url::parse(&self.url).unwrap()
-    }
-
     fn url_eq(&self, url: &Url) -> bool {
-        self.parsed_url() == *url
+        self.url == *url
     }
 
     fn domain_eq(&self, url: &Url) -> bool {
-        self.parsed_url().domain() == url.domain()
+        self.url.domain() == url.domain()
     }
 
     fn can_enqueue(&self, url: &str) -> Option<Url> {

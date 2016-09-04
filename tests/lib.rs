@@ -7,11 +7,13 @@ use maman::{Spider, Page};
 use std::env;
 use std::collections::BTreeMap;
 
+use url::Url;
+
 fn visit_page(input: &str) -> Spider {
     env::set_var("MAMAN_ENV", "test");
-    let url = "http://example.net/";
-    let mut spider = Spider::new(url.to_string(), 0, vec![]);
-    let page = Page::new(url.to_string(), input.to_string(), BTreeMap::new(), vec![]);
+    let url = Url::parse("http://example.net/").unwrap();
+    let mut spider = Spider::new(url.clone(), 0, vec![]);
+    let page = Page::new(url, input.to_string(), BTreeMap::new(), vec![]);
     let tok = Spider::read_page(page, input);
     spider.visit_page(tok.unwrap());
     spider
@@ -61,7 +63,7 @@ fn test_other_domain_link() {
 fn test_json_job_format() {
     env::set_var("MAMAN_ENV", "test");
     let input = "<html><body><a href='/todo#new' /><a href='/new' /></html>";
-    let url = "http://example.net/".to_string();
+    let url = Url::parse("http://example.net/").unwrap();
     let mut headers = BTreeMap::new();
     headers.insert("content-type".to_string(), "text/html".to_string());
     let page = Page::new(url, input.to_string(), headers.clone(), vec![]);

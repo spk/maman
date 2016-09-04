@@ -4,8 +4,8 @@ use std::ascii::AsciiExt;
 use std::default::Default;
 use std::collections::BTreeMap;
 
-use tendril::SliceExt;
 use url::Url;
+use tendril::SliceExt;
 use hyper::header::UserAgent;
 use hyper::Client as HyperClient;
 use hyper::client::RedirectPolicy;
@@ -25,9 +25,9 @@ mod page;
 const MAMAN_ENV: &'static str = "MAMAN_ENV";
 
 pub struct Spider<'a> {
-    pub base_url: String,
-    pub visited_urls: Vec<String>,
-    pub unvisited_urls: Vec<String>,
+    pub base_url: Url,
+    pub visited_urls: Vec<Url>,
+    pub unvisited_urls: Vec<Url>,
     pub extra: Vec<String>,
     pub env: String,
     pub limit: isize,
@@ -36,9 +36,9 @@ pub struct Spider<'a> {
 }
 
 impl<'a> Spider<'a> {
-    pub fn new(base_url: String, limit: isize, extra: Vec<String>) -> Spider<'a> {
+    pub fn new(base_url: Url, limit: isize, extra: Vec<String>) -> Spider<'a> {
         let maman_env = env::var(&MAMAN_ENV.to_string()).unwrap_or("development".to_string());
-        let robots_txt = Url::parse(&base_url).unwrap().join("/robots.txt").unwrap();
+        let robots_txt = base_url.join("/robots.txt").unwrap();
         let robot_file_parser = RobotFileParser::new(robots_txt);
         let client_opts =
             SidekiqClientOpts { namespace: Some(maman_env.to_string()), ..Default::default() };
@@ -71,14 +71,13 @@ impl<'a> Spider<'a> {
     pub fn crawl(&mut self) {
         self.robot_parser.read();
         let base_url = self.base_url.clone();
-        if let Some(response) = Spider::load_url(&base_url) {
+        if let Some(response) = Spider::load_url(self.base_url.as_ref()) {
             self.visit(&base_url, response);
             while let Some(url) = self.unvisited_urls.pop() {
                 if self.continue_to_crawl() {
                     if !self.visited_urls.contains(&url) {
-                        let url_ser = &url.to_string();
-                        if let Some(response) = Spider::load_url(url_ser) {
-                            self.visit(url_ser, response);
+                        if let Some(response) = Spider::load_url(url.as_ref()) {
+                            self.visit(&url, response);
                         }
                     }
                 } else {
@@ -95,18 +94,11 @@ impl<'a> Spider<'a> {
         tok
     }
 
-    fn visit(&mut self, page_url: &str, response: HttpResponse) {
-        match Url::parse(page_url) {
-            Ok(u) => {
-                if self.can_visit(u.clone()) {
-                    if let Some(page) = Spider::read_response(u.to_string(),
-                                                              response,
-                                                              self.extra.clone()) {
-                        self.visit_page(page);
-                    }
-                }
+    fn visit(&mut self, page_url: &Url, response: HttpResponse) {
+        if self.can_visit(page_url) {
+            if let Some(page) = Spider::read_response(page_url, response, self.extra.clone()) {
+                self.visit_page(page);
             }
-            Err(_) => {}
         }
     }
 
@@ -114,11 +106,11 @@ impl<'a> Spider<'a> {
         self.limit == 0 || (self.visited_urls.len() as isize) < self.limit
     }
 
-    fn can_visit(&self, page_url: Url) -> bool {
+    fn can_visit(&self, page_url: &Url) -> bool {
         self.robot_parser.can_fetch(maman_name!(), page_url.path())
     }
 
-    fn read_response(page_url: String,
+    fn read_response(page_url: &Url,
                      mut response: HttpResponse,
                      extra: Vec<String>)
                      -> Option<Page> {
@@ -132,7 +124,7 @@ impl<'a> Spider<'a> {
         let _ = response.read_to_end(&mut document);
         match UTF_8.decode(&document, DecoderTrap::Ignore) {
             Ok(doc) => {
-                let page = Page::new(page_url, doc.to_string(), headers.clone(), extra);
+                let page = Page::new(page_url.clone(), doc.to_string(), headers.clone(), extra);
                 let read = Spider::read_page(page, &doc).unwrap();
                 Some(read)
             }
