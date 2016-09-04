@@ -74,7 +74,7 @@ impl<'a> Spider<'a> {
         if let Some(response) = Spider::load_url(&base_url) {
             self.visit(&base_url, response);
             while let Some(url) = self.unvisited_urls.pop() {
-                if self.limit == 0 || (self.visited_urls.len() as isize) < self.limit {
+                if self.continue_to_crawl() {
                     if !self.visited_urls.contains(&url) {
                         let url_ser = &url.to_string();
                         if let Some(response) = Spider::load_url(url_ser) {
@@ -108,6 +108,10 @@ impl<'a> Spider<'a> {
             }
             Err(_) => {}
         }
+    }
+
+    fn continue_to_crawl(&self) -> bool {
+        self.limit == 0 || (self.visited_urls.len() as isize) < self.limit
     }
 
     fn can_visit(&self, page_url: Url) -> bool {
