@@ -1,5 +1,3 @@
-extern crate env_logger;
-
 mod page;
 pub use self::page::Page;
 
@@ -39,7 +37,6 @@ pub struct Spider<'a> {
 
 impl<'a> Spider<'a> {
     pub fn new(base_url: Url, limit: isize, extra: Vec<String>) -> Spider<'a> {
-        env_logger::init().unwrap();
         let maman_env = env::var(&MAMAN_ENV.to_string()).unwrap_or("development".to_string());
         let robots_txt = base_url.join("/robots.txt").unwrap();
         let robot_file_parser = RobotFileParser::new(robots_txt);

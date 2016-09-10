@@ -8,10 +8,10 @@ build: ## Build
 	@cargo build
 
 test: ## Test
-	@RUST_TEST_THREADS=1 cargo test
+	cargo test
 
 bench: ## Bench
-	@RUST_TEST_THREADS=1 cargo bench
+	cargo bench
 
 docs: build
 	@cargo doc --no-deps
