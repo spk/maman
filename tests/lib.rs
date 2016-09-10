@@ -13,7 +13,7 @@ use url::Url;
 
 fn visit_page(input: &str) -> Spider {
     env::set_var("MAMAN_ENV", "test");
-    let url = Url::parse("http://example.net/").unwrap();
+    let url = Url::parse("https://example.net/").unwrap();
     let redis_pool = create_redis_pool().unwrap();
     let mut spider = Spider::new(redis_pool, url.clone(), 0, vec![]);
     let page = Page::new(url, input.to_string(), BTreeMap::new(), vec![]);

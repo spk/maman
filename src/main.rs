@@ -19,13 +19,11 @@ fn print_usage() {
     println!("Usage: maman URL [LIMIT]");
 }
 
-#[cfg(not(test))]
-fn main() {
-    env_logger::init().unwrap();
-    let url = match env::args().nth(1) {
+fn fetch_url(url_arg: Option<String>) -> Url {
+    match url_arg {
         Some(url) => {
             match Url::parse(url.as_ref()) {
-                Ok(u) => u,
+                Ok(u) => return u,
                 Err(_) => {
                     print_usage();
                     process::exit(1);
@@ -36,8 +34,11 @@ fn main() {
             print_usage();
             process::exit(1);
         }
-    };
-    let limit = match env::args().nth(2) {
+    }
+}
+
+fn fetch_limit(limit_arg: Option<String>) -> isize {
+    match limit_arg {
         Some(limit) => {
             match limit.parse::<isize>() {
                 Err(_) => 0,
@@ -45,13 +46,20 @@ fn main() {
             }
         }
         None => 0,
-    };
+    }
+}
+
+fn main() {
+    env_logger::init().unwrap();
 
     match create_redis_pool() {
         Ok(redis_pool) => {
-            let mut spider = Spider::new(redis_pool, url, limit, vec![]);
+            let mut spider = Spider::new(redis_pool,
+                                         fetch_url(env::args().nth(1)),
+                                         fetch_limit(env::args().nth(2)),
+                                         vec![]);
             spider.crawl()
-        },
+        }
         Err(err) => {
             error!("Redis error: {}", err);
             process::exit(1);

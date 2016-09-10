@@ -36,7 +36,11 @@ pub struct Spider<'a> {
 }
 
 impl<'a> Spider<'a> {
-    pub fn new(redis_pool: RedisPool, base_url: Url, limit: isize, extra: Vec<String>) -> Spider<'a> {
+    pub fn new(redis_pool: RedisPool,
+               base_url: Url,
+               limit: isize,
+               extra: Vec<String>)
+               -> Spider<'a> {
         let maman_env = env::var(&MAMAN_ENV.to_string()).unwrap_or("development".to_string());
         let robots_txt = base_url.join("/robots.txt").unwrap();
         let robot_file_parser = RobotFileParser::new(robots_txt);
