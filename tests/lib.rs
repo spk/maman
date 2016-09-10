@@ -1,8 +1,10 @@
 extern crate url;
 #[macro_use]
 extern crate maman;
+extern crate sidekiq;
 
 use maman::{Spider, Page};
+use sidekiq::create_redis_pool;
 
 use std::env;
 use std::collections::BTreeMap;
@@ -12,7 +14,8 @@ use url::Url;
 fn visit_page(input: &str) -> Spider {
     env::set_var("MAMAN_ENV", "test");
     let url = Url::parse("http://example.net/").unwrap();
-    let mut spider = Spider::new(url.clone(), 0, vec![]);
+    let redis_pool = create_redis_pool().unwrap();
+    let mut spider = Spider::new(redis_pool, url.clone(), 0, vec![]);
     let page = Page::new(url, input.to_string(), BTreeMap::new(), vec![]);
     let tok = Spider::read_page(page, input);
     spider.visit_page(tok.unwrap());

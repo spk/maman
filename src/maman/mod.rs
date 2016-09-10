@@ -18,7 +18,7 @@ use robotparser::RobotFileParser;
 use html5ever::tokenizer::Tokenizer;
 use sidekiq::Client as SidekiqClient;
 use sidekiq::ClientOpts as SidekiqClientOpts;
-use sidekiq::create_redis_pool;
+use sidekiq::RedisPool;
 use encoding::{Encoding, DecoderTrap};
 use encoding::all::UTF_8;
 
@@ -36,13 +36,13 @@ pub struct Spider<'a> {
 }
 
 impl<'a> Spider<'a> {
-    pub fn new(base_url: Url, limit: isize, extra: Vec<String>) -> Spider<'a> {
+    pub fn new(redis_pool: RedisPool, base_url: Url, limit: isize, extra: Vec<String>) -> Spider<'a> {
         let maman_env = env::var(&MAMAN_ENV.to_string()).unwrap_or("development".to_string());
         let robots_txt = base_url.join("/robots.txt").unwrap();
         let robot_file_parser = RobotFileParser::new(robots_txt);
         let client_opts =
             SidekiqClientOpts { namespace: Some(maman_env.to_string()), ..Default::default() };
-        let sidekiq = SidekiqClient::new(create_redis_pool(), client_opts);
+        let sidekiq = SidekiqClient::new(redis_pool, client_opts);
         Spider {
             base_url: base_url,
             visited_urls: Vec::new(),

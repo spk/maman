@@ -5,12 +5,14 @@ extern crate url;
 
 #[macro_use]
 extern crate maman;
+extern crate sidekiq;
 
 use std::env;
 use std::process;
 
 use url::Url;
 use maman::Spider;
+use sidekiq::create_redis_pool;
 
 fn print_usage() {
     println!(maman_version_string!());
@@ -45,6 +47,14 @@ fn main() {
         None => 0,
     };
 
-    let mut spider = Spider::new(url, limit, vec![]);
-    spider.crawl()
+    match create_redis_pool() {
+        Ok(redis_pool) => {
+            let mut spider = Spider::new(redis_pool, url, limit, vec![]);
+            spider.crawl()
+        },
+        Err(err) => {
+            error!("Redis error: {}", err);
+            process::exit(1);
+        }
+    }
 }
