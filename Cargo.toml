@@ -20,3 +20,5 @@ url = { version = "1.2", features = ["serde"] }
 robotparser = "0.6.0"
 sidekiq = "0.2.2"
 encoding = "0.2"
+log = "0.3"
+env_logger = "0.3"

@@ -39,10 +39,16 @@ maman URL [LIMIT]
 
 `LIMIT` must be an interger or `0` is the default, meaning no limit.
 
-## Default environment variables
+## Environment variables
+
+### Defaults
 
 * MAMAN_ENV=development
 * REDIS_URL="redis://127.0.0.1/"
+
+### Others
+
+* RUST_LOG=maman=info
 
 ## LICENSE
 

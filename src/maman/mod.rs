@@ -1,5 +1,10 @@
+extern crate env_logger;
+
+mod page;
+pub use self::page::Page;
+
 use std::env;
-use std::io::{Read, Write};
+use std::io::Read;
 use std::ascii::AsciiExt;
 use std::default::Default;
 use std::collections::BTreeMap;
@@ -19,17 +24,7 @@ use sidekiq::create_redis_pool;
 use encoding::{Encoding, DecoderTrap};
 use encoding::all::UTF_8;
 
-pub use self::page::Page;
-mod page;
-
 const MAMAN_ENV: &'static str = "MAMAN_ENV";
-
-macro_rules! println_err(
-    ($($arg:tt)*) => { {
-        let r = writeln!(&mut ::std::io::stderr(), $($arg)*);
-        r.expect("failed printing to stderr");
-    } }
-    );
 
 pub struct Spider<'a> {
     pub base_url: Url,
@@ -44,6 +39,7 @@ pub struct Spider<'a> {
 
 impl<'a> Spider<'a> {
     pub fn new(base_url: Url, limit: isize, extra: Vec<String>) -> Spider<'a> {
+        env_logger::init().unwrap();
         let maman_env = env::var(&MAMAN_ENV.to_string()).unwrap_or("development".to_string());
         let robots_txt = base_url.join("/robots.txt").unwrap();
         let robot_file_parser = RobotFileParser::new(robots_txt);
@@ -69,7 +65,7 @@ impl<'a> Spider<'a> {
         }
         match self.sidekiq.push(page.to_job()) {
             Err(err) => {
-                println_err!("SidekiqClient push failed: {}", err);
+                error!("SidekiqClient push failed: {}", err);
             }
             Ok(_) => {}
         }
@@ -103,6 +99,7 @@ impl<'a> Spider<'a> {
 
     fn visit(&mut self, page_url: &Url, response: HttpResponse) {
         if self.can_visit(page_url) {
+            info!("{}", page_url);
             if let Some(page) = Spider::read_response(page_url, response, self.extra.clone()) {
                 self.visit_page(page);
             }

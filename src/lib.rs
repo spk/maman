@@ -2,6 +2,8 @@
 
 #[macro_use]
 extern crate string_cache;
+#[macro_use]
+extern crate log;
 extern crate tendril;
 extern crate html5ever;
 extern crate url;
