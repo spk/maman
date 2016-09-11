@@ -1,4 +1,17 @@
 
+0.7.0 / 2016-09-11
+==================
+
+  * Use makefile for install and add manpage
+  * Cleanup main
+  * Better error handling for redis pool
+  * Use properly env_logger and fix tests
+  * Use log and env_logger crate
+  * Print sidekiq error to stderr
+  * Use rust-url feature serde for serialization
+  * Add continue_to_crawl fn
+  * Move page to own file
+
 0.6.0 / 2016-09-03
 ==================
 
