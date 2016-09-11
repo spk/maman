@@ -3,7 +3,7 @@
 Maman is a Rust Web Crawler saving pages on Redis.
 
 Pages are send to list `<MAMAN_ENV>:queue:maman` using
-[Sidekiq](https://github.com/mperham/sidekiq/wiki/Job-Format) job format:
+[Sidekiq job format](https://github.com/mperham/sidekiq/wiki/Job-Format)
 
 ``` json
 {
@@ -27,8 +27,16 @@ Pages are send to list `<MAMAN_ENV>:queue:maman` using
 
 ## Installation
 
+### With cargo
+
 ~~~
 cargo install maman
+~~~
+
+### With make
+
+~~~
+PREFIX=~/.local make install
 ~~~
 
 ## Usage
@@ -59,5 +67,6 @@ Copyright (c) 2016 Laurent Arnoud <laurent@spkdev.net>
 ---
 [![Build](https://img.shields.io/travis-ci/spk/maman.svg)](https://travis-ci.org/spk/maman)
 [![Version](https://img.shields.io/crates/v/maman.svg)](https://crates.io/crates/maman)
+[![Documentation](https://img.shields.io/badge/doc-rustdoc-blue.svg)](https://docs.rs/maman/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT "MIT")
 [![Project status](http://img.shields.io/status/experimental.png?color=red)](https://github.com/spk/maman)

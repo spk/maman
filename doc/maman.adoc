@@ -1,0 +1,46 @@
+= maman(1)
+
+== NAME
+
+maman - Rust Web Crawler saving pages on Redis
+
+== SYNOPSIS
+
+*maman* URL ['LIMIT']
+
+== DESCRIPTION
+
+Maman is a Rust Web Crawler saving pages on Redis.
+Pages are send to list <MAMAN_ENV>:queue:maman using
+https://github.com/mperham/sidekiq/wiki/Job-Format[Sidekiq job format]
+
+== URL
+
+Must be a valid http url.
+
+== LIMIT
+
+Crawling limit must be an interger or 0 is the default, meaning no limit.
+
+== Environment variables
+
+=== Defaults
+
+* MAMAN_ENV=development
+* REDIS_URL="redis://127.0.0.1/"
+
+=== Others
+
+* RUST_LOG=maman=info
+
+== AUTHOR
+
+Laurent Arnoud <laurent@spkdev.net>
+
+== LICENSE
+
+The MIT License
+
+Copyright (c) 2016 Laurent Arnoud <laurent@spkdev.net>
+
+// vim: set syntax=asciidoc:

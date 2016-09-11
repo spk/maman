@@ -13,5 +13,4 @@ matrix:
     - rust: beta
 
 script:
-  - make build
-  - make test
+  - cargo test -v
