@@ -13,10 +13,10 @@ Pages are send to list `<MAMAN_ENV>:queue:maman` using
 "created_at": 1461789979, "enqueued_at": 1461789979,
 "args": {
     "document":"<html><body><a href='#' /><a href='/new' /></html>",
-    "urls": ["http://example.net/new"],
+    "urls": ["https://example.net/new"],
     "extra": [],
     "headers": {"content-type": "text/html"},
-    "url": "http://example.net/"
+    "url": "https://example.net/"
     }
 }
 ```
@@ -68,5 +68,5 @@ Copyright (c) 2016 Laurent Arnoud <laurent@spkdev.net>
 [![Build](https://img.shields.io/travis-ci/spk/maman.svg)](https://travis-ci.org/spk/maman)
 [![Version](https://img.shields.io/crates/v/maman.svg)](https://crates.io/crates/maman)
 [![Documentation](https://img.shields.io/badge/doc-rustdoc-blue.svg)](https://docs.rs/maman/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT "MIT")
-[![Project status](http://img.shields.io/status/experimental.png?color=red)](https://github.com/spk/maman)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT "MIT")
+[![Project status](https://img.shields.io/status/experimental.png?color=red)](https://github.com/spk/maman)
