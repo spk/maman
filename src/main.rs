@@ -56,8 +56,7 @@ fn main() {
         Ok(redis_pool) => {
             let mut spider = Spider::new(redis_pool,
                                          fetch_url(env::args().nth(1)),
-                                         fetch_limit(env::args().nth(2)),
-                                         vec![]);
+                                         fetch_limit(env::args().nth(2)));
             spider.crawl()
         }
         Err(err) => {

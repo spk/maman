@@ -12,7 +12,6 @@ pub struct Page {
     pub document: String,
     pub headers: BTreeMap<String, String>,
     pub urls: Vec<Url>,
-    pub extra: Vec<String>,
 }
 
 impl TokenSink for Page {
@@ -41,17 +40,12 @@ impl TokenSink for Page {
 }
 
 impl Page {
-    pub fn new(url: Url,
-               document: String,
-               headers: BTreeMap<String, String>,
-               extra: Vec<String>)
-               -> Self {
+    pub fn new(url: Url, document: String, headers: BTreeMap<String, String>) -> Self {
         Page {
             url: url,
             document: document,
             headers: headers,
             urls: Vec::new(),
-            extra: extra,
         }
     }
 
@@ -67,7 +61,6 @@ impl Page {
             .insert("document".to_string(), &self.document)
             .insert("headers".to_string(), &self.headers)
             .insert("urls".to_string(), &self.urls)
-            .insert("extra".to_string(), &self.extra)
             .build()
     }
 

@@ -28,7 +28,6 @@ pub struct Spider<'a> {
     pub base_url: Url,
     pub visited_urls: Vec<Url>,
     pub unvisited_urls: Vec<Url>,
-    pub extra: Vec<String>,
     pub env: String,
     pub limit: isize,
     sidekiq: SidekiqClient,
@@ -36,11 +35,7 @@ pub struct Spider<'a> {
 }
 
 impl<'a> Spider<'a> {
-    pub fn new(redis_pool: RedisPool,
-               base_url: Url,
-               limit: isize,
-               extra: Vec<String>)
-               -> Spider<'a> {
+    pub fn new(redis_pool: RedisPool, base_url: Url, limit: isize) -> Spider<'a> {
         let maman_env = env::var(&MAMAN_ENV.to_string()).unwrap_or("development".to_string());
         let robots_txt = base_url.join("/robots.txt").unwrap();
         let robot_file_parser = RobotFileParser::new(robots_txt);
@@ -51,7 +46,6 @@ impl<'a> Spider<'a> {
             base_url: base_url,
             visited_urls: Vec::new(),
             unvisited_urls: Vec::new(),
-            extra: extra,
             sidekiq: sidekiq,
             env: maman_env,
             robot_parser: robot_file_parser,
@@ -101,7 +95,7 @@ impl<'a> Spider<'a> {
     fn visit(&mut self, page_url: &Url, response: HttpResponse) {
         if self.can_visit(page_url) {
             info!("{}", page_url);
-            if let Some(page) = Spider::read_response(page_url, response, self.extra.clone()) {
+            if let Some(page) = Spider::read_response(page_url, response) {
                 self.visit_page(page);
             }
         }
@@ -115,10 +109,7 @@ impl<'a> Spider<'a> {
         self.robot_parser.can_fetch(maman_name!(), page_url.path())
     }
 
-    fn read_response(page_url: &Url,
-                     mut response: HttpResponse,
-                     extra: Vec<String>)
-                     -> Option<Page> {
+    fn read_response(page_url: &Url, mut response: HttpResponse) -> Option<Page> {
         let mut headers = BTreeMap::new();
         {
             for h in response.headers.iter() {
@@ -129,7 +120,7 @@ impl<'a> Spider<'a> {
         let _ = response.read_to_end(&mut document);
         match UTF_8.decode(&document, DecoderTrap::Ignore) {
             Ok(doc) => {
-                let page = Page::new(page_url.clone(), doc.to_string(), headers.clone(), extra);
+                let page = Page::new(page_url.clone(), doc.to_string(), headers.clone());
                 let read = Spider::read_page(page, &doc).unwrap();
                 Some(read)
             }

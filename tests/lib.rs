@@ -15,8 +15,8 @@ fn visit_page(input: &str) -> Spider {
     env::set_var("MAMAN_ENV", "test");
     let url = Url::parse("https://example.net/").unwrap();
     let redis_pool = create_redis_pool().unwrap();
-    let mut spider = Spider::new(redis_pool, url.clone(), 0, vec![]);
-    let page = Page::new(url, input.to_string(), BTreeMap::new(), vec![]);
+    let mut spider = Spider::new(redis_pool, url.clone(), 0);
+    let page = Page::new(url, input.to_string(), BTreeMap::new());
     let tok = Spider::read_page(page, input);
     spider.visit_page(tok.unwrap());
     spider
@@ -69,7 +69,7 @@ fn test_json_job_format() {
     let url = Url::parse("http://example.net/").unwrap();
     let mut headers = BTreeMap::new();
     headers.insert("content-type".to_string(), "text/html".to_string());
-    let page = Page::new(url, input.to_string(), headers.clone(), vec![]);
+    let page = Page::new(url, input.to_string(), headers.clone());
     let page_object = page.as_object();
     let job = page.to_job();
     assert_eq!(job.class, maman_name!());
