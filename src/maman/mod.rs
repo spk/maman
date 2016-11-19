@@ -9,11 +9,10 @@ use std::collections::BTreeMap;
 
 use url::Url;
 use tendril::SliceExt;
-use hyper::header::UserAgent;
-use hyper::Client as HyperClient;
-use hyper::client::RedirectPolicy;
-use hyper::client::Response as HttpResponse;
-use hyper::status::StatusCode;
+use reqwest::Client as HttpClient;
+use reqwest::header::UserAgent;
+use reqwest::StatusCode;
+use reqwest::Response as HttpResponse;
 use robotparser::RobotFileParser;
 use html5ever::tokenizer::Tokenizer;
 use sidekiq::Client as SidekiqClient;
@@ -112,7 +111,7 @@ impl<'a> Spider<'a> {
     fn read_response(page_url: &Url, mut response: HttpResponse) -> Option<Page> {
         let mut headers = BTreeMap::new();
         {
-            for h in response.headers.iter() {
+            for h in response.headers().iter() {
                 headers.insert(h.name().to_ascii_lowercase(), h.value_string());
             }
         }
@@ -129,13 +128,14 @@ impl<'a> Spider<'a> {
     }
 
     fn load_url(url: &str) -> Option<HttpResponse> {
-        let mut client = HyperClient::new();
-        client.set_redirect_policy(RedirectPolicy::FollowNone);
-        let request = client.get(url).header(UserAgent(maman_user_agent!().to_owned()));
+        let client = HttpClient::new().expect("HttpClient failed to construct");
+        let request = client.get(url)
+            .header(UserAgent(maman_user_agent!().to_owned()));
         match request.send() {
             Ok(response) => {
-                match response.status {
-                    StatusCode::Ok | StatusCode::NotModified => Some(response),
+                match response.status() {
+                    &StatusCode::Ok |
+                    &StatusCode::NotModified => Some(response),
                     _ => None,
                 }
             }

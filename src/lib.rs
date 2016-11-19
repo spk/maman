@@ -7,7 +7,7 @@ extern crate log;
 extern crate tendril;
 extern crate html5ever;
 extern crate url;
-extern crate hyper;
+extern crate reqwest;
 extern crate serde;
 extern crate serde_json;
 extern crate robotparser;
