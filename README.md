@@ -14,7 +14,6 @@ Pages are send to list `<MAMAN_ENV>:queue:maman` using
 "args": {
     "document":"<html><body><a href='#' /><a href='/new' /></html>",
     "urls": ["https://example.net/new"],
-    "extra": [],
     "headers": {"content-type": "text/html"},
     "url": "https://example.net/"
     }

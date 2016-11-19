@@ -1,4 +1,9 @@
 
+0.9.0 / 2016-11-19
+==================
+
+  * Use reqwest as http client and upgrade robotparser
+
 0.8.0 / 2016-10-09
 ==================
 
