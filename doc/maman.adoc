@@ -20,7 +20,7 @@ Must be a valid http url.
 
 == LIMIT
 
-Crawling limit must be an interger or 0 is the default, meaning no limit.
+Crawling limit must be an integer or 0 is the default, meaning no limit.
 
 == Environment variables
 

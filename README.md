@@ -44,7 +44,7 @@ PREFIX=~/.local make install
 maman URL [LIMIT]
 ~~~
 
-`LIMIT` must be an interger or `0` is the default, meaning no limit.
+`LIMIT` must be an integer or `0` is the default, meaning no limit.
 
 ## Environment variables
 
