@@ -10,7 +10,7 @@ license = "MIT"
 readme = "README.md"
 
 [dependencies]
-reqwest = "0.1.0"
+reqwest = "0.2.0"
 html5ever = "0.5"
 tendril = "0.2"
 string_cache = "0.2"
@@ -18,7 +18,7 @@ serde = "0.8"
 serde_json = "0.8"
 url = { version = "1.2", features = ["serde"] }
 robotparser = "0.8.0"
-sidekiq = "0.3.0"
+sidekiq = "0.4.0"
 encoding = "0.2"
 log = "0.3"
 env_logger = "0.3"
