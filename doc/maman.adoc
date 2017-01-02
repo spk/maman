@@ -41,6 +41,6 @@ Laurent Arnoud <laurent@spkdev.net>
 
 The MIT License
 
-Copyright (c) 2016 Laurent Arnoud <laurent@spkdev.net>
+Copyright (c) 2016-2017 Laurent Arnoud <laurent@spkdev.net>
 
 // vim: set syntax=asciidoc:

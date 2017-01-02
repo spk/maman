@@ -61,7 +61,7 @@ maman URL [LIMIT]
 
 The MIT License
 
-Copyright (c) 2016 Laurent Arnoud <laurent@spkdev.net>
+Copyright (c) 2016-2017 Laurent Arnoud <laurent@spkdev.net>
 
 ---
 [![Build](https://img.shields.io/travis-ci/spk/maman.svg)](https://travis-ci.org/spk/maman)
