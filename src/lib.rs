@@ -4,8 +4,10 @@
 extern crate string_cache;
 #[macro_use]
 extern crate log;
-extern crate tendril;
 extern crate html5ever;
+#[macro_use]
+extern crate html5ever_atoms;
+extern crate tendril;
 extern crate url;
 extern crate reqwest;
 extern crate serde;

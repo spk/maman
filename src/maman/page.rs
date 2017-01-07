@@ -5,7 +5,7 @@ use url::{Url, ParseError};
 use sidekiq::{Job, JobOpts};
 use serde_json::value::Value;
 use serde_json::builder::ObjectBuilder;
-use html5ever::tokenizer::{TokenSink, Token, TagToken};
+use html5ever::tokenizer::{TokenSink, Token, TagToken, TokenSinkResult};
 
 pub struct Page {
     pub url: Url,
@@ -15,11 +15,13 @@ pub struct Page {
 }
 
 impl TokenSink for Page {
-    fn process_token(&mut self, token: Token) {
+    type Handle = ();
+
+    fn process_token(&mut self, token: Token) -> TokenSinkResult<()> {
         match token {
             TagToken(tag) => {
                 match tag.name {
-                    atom!("a") => {
+                    local_name!("a") => {
                         for attr in tag.attrs.iter() {
                             if attr.name.local.to_string() == "href" {
                                 match self.can_enqueue(&attr.value) {
@@ -36,6 +38,7 @@ impl TokenSink for Page {
             }
             _ => {}
         }
+        TokenSinkResult::Continue
     }
 }
 

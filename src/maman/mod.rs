@@ -8,13 +8,13 @@ use std::default::Default;
 use std::collections::BTreeMap;
 
 use url::Url;
-use tendril::SliceExt;
 use reqwest::Client as HttpClient;
 use reqwest::header::UserAgent;
 use reqwest::StatusCode;
 use reqwest::Response as HttpResponse;
 use robotparser::RobotFileParser;
 use html5ever::tokenizer::Tokenizer;
+use html5ever::tokenizer::buffer_queue::BufferQueue;
 use sidekiq::Client as SidekiqClient;
 use sidekiq::ClientOpts as SidekiqClientOpts;
 use sidekiq::RedisPool;
@@ -86,7 +86,9 @@ impl<'a> Spider<'a> {
 
     pub fn read_page(page: Page, document: &str) -> Tokenizer<Page> {
         let mut tok = Tokenizer::new(page, Default::default());
-        tok.feed(document.to_tendril());
+        let mut input = BufferQueue::new();
+        input.push_back(String::from(document).into());
+        let _ = tok.feed(&mut input);
         tok.end();
         tok
     }
