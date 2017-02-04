@@ -9,9 +9,13 @@ extern crate html5ever;
 extern crate html5ever_atoms;
 extern crate tendril;
 extern crate url;
+extern crate url_serde;
 extern crate reqwest;
 extern crate serde;
+#[macro_use]
 extern crate serde_json;
+#[macro_use]
+extern crate serde_derive;
 extern crate robotparser;
 extern crate sidekiq;
 extern crate encoding;

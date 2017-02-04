@@ -4,14 +4,15 @@ use std::collections::BTreeMap;
 use url::{Url, ParseError};
 use sidekiq::{Job, JobOpts};
 use serde_json::value::Value;
-use serde_json::builder::ObjectBuilder;
+use url_serde::Serde;
 use html5ever::tokenizer::{TokenSink, Token, TagToken, TokenSinkResult};
 
+#[derive(Serialize, Debug)]
 pub struct Page {
-    pub url: Url,
+    pub url: Serde<Url>,
     pub document: String,
     pub headers: BTreeMap<String, String>,
-    pub urls: Vec<Url>,
+    pub urls: Vec<Serde<Url>>,
 }
 
 impl TokenSink for Page {
@@ -26,7 +27,7 @@ impl TokenSink for Page {
                             if attr.name.local.to_string() == "href" {
                                 match self.can_enqueue(&attr.value) {
                                     Some(u) => {
-                                        self.urls.push(u);
+                                        self.urls.push(Serde(u));
                                     }
                                     None => {}
                                 }
@@ -45,7 +46,7 @@ impl TokenSink for Page {
 impl Page {
     pub fn new(url: Url, document: String, headers: BTreeMap<String, String>) -> Self {
         Page {
-            url: url,
+            url: Serde(url),
             document: document,
             headers: headers,
             urls: Vec::new(),
@@ -59,12 +60,12 @@ impl Page {
     }
 
     pub fn as_object(&self) -> Value {
-        ObjectBuilder::new()
-            .insert("url".to_string(), &self.url)
-            .insert("document".to_string(), &self.document)
-            .insert("headers".to_string(), &self.headers)
-            .insert("urls".to_string(), &self.urls)
-            .build()
+        json!({
+            "url": &self.url,
+            "document": &self.document,
+            "headers": &self.headers,
+            "urls": &self.urls,
+        })
     }
 
     fn normalize_url(&self, url: &str) -> Option<Url> {

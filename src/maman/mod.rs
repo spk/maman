@@ -20,13 +20,14 @@ use sidekiq::ClientOpts as SidekiqClientOpts;
 use sidekiq::RedisPool;
 use encoding::{Encoding, DecoderTrap};
 use encoding::all::UTF_8;
+use url_serde::Serde;
 
 const MAMAN_ENV: &'static str = "MAMAN_ENV";
 
 pub struct Spider<'a> {
     pub base_url: Url,
-    pub visited_urls: Vec<Url>,
-    pub unvisited_urls: Vec<Url>,
+    pub visited_urls: Vec<Serde<Url>>,
+    pub unvisited_urls: Vec<Serde<Url>>,
     pub env: String,
     pub limit: isize,
     sidekiq: SidekiqClient,
