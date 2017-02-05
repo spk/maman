@@ -5,9 +5,12 @@ authors = ["Laurent Arnoud <laurent@spkdev.net>"]
 description = "Rust Web Crawler"
 repository = "https://github.com/spk/maman.git"
 homepage = "https://github.com/spk/maman"
-keywords = ["web", "crawler", "spider"]
+keywords = ["http", "web", "crawler", "spider"]
 license = "MIT"
 readme = "README.md"
+
+[badges]
+travis-ci = { repository = "spk/maman" }
 
 [dependencies]
 reqwest = "0.4.0"
