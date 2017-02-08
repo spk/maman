@@ -2,8 +2,7 @@ use std::default::Default;
 use std::collections::BTreeMap;
 
 use url::{Url, ParseError};
-use sidekiq::{Job, JobOpts};
-use serde_json::value::Value;
+use sidekiq::{Job, JobOpts, Value};
 use url_serde::Serde;
 use html5ever::tokenizer::{TokenSink, Token, TagToken, TokenSinkResult};
 
