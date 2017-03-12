@@ -1,4 +1,12 @@
 
+0.11.0 / 2017-03-07
+==================
+
+  * Use sidekiq pub Value
+  * Update sidekiq client to 0.6
+  * Add travis-ci badge to crates.io
+  * Update serde to version 0.9
+
 0.10.0 / 2017-01-08
 ==================
 
