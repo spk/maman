@@ -1,6 +1,6 @@
 
-0.11.0 / 2017-03-07
-==================
+0.11.0 / 2017-03-12
+===================
 
   * Use sidekiq pub Value
   * Update sidekiq client to 0.6
@@ -8,7 +8,7 @@
   * Update serde to version 0.9
 
 0.10.0 / 2017-01-08
-==================
+===================
 
   * Update html5ever to 0.10
   * Update reqwest to 0.2.0 and sidekiq to 0.4.0
