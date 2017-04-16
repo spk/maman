@@ -10,7 +10,6 @@
 
 #![crate_name = "maman"]
 
-#[macro_use]
 extern crate string_cache;
 #[macro_use]
 extern crate log;
