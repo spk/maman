@@ -58,7 +58,7 @@ impl<'a> Spider<'a> {
 
     pub fn visit_page(&mut self, page: Page) {
         self.visited_urls.push(page.url.clone());
-        for u in page.urls.iter() {
+        for u in &page.urls {
             self.unvisited_urls.push(u.clone());
         }
         match self.sidekiq.push(page.to_job()) {
