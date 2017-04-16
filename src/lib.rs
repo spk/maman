@@ -1,3 +1,13 @@
+//! Maman is a Rust Web Crawler saving pages on Redis.
+//!
+//! # Default environment variables
+//!
+//! * `MAMAN_ENV`=development
+//! * `REDIS_URL`="redis://127.0.0.1/"
+#![deny(warnings)]
+#![cfg_attr(feature = "clippy", feature(plugin))]
+#![cfg_attr(feature = "clippy", plugin(clippy))]
+
 #![crate_name = "maman"]
 
 #[macro_use]

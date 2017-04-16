@@ -1,19 +1,20 @@
+---
 services:
   - redis-server
 
 language: rust
-rust:
-  - nightly
-  - beta
-  - stable
-
-matrix:
-  allow_failures:
-    - rust: nightly
-    - rust: beta
+cache: cargo
+rust: stable
 
 script:
   - cargo test -v
+
+matrix:
+  include:
+    - rust: nightly
+      env: CLIPPY=1
+      script:
+        - cargo rustc --lib --features "lint" -- -Zno-trans
 
 notifications:
   email:
