@@ -53,8 +53,10 @@ impl Page {
     }
 
     pub fn to_job(&self) -> Job {
-        let job_opts =
-            JobOpts { queue: maman_name!().to_string().to_lowercase(), ..Default::default() };
+        let job_opts = JobOpts {
+            queue: maman_name!().to_string().to_lowercase(),
+            ..Default::default()
+        };
         Job::new(maman_name!().to_string(), vec![self.as_object()], job_opts)
     }
 

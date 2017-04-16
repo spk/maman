@@ -39,8 +39,10 @@ impl<'a> Spider<'a> {
         let maman_env = env::var(&MAMAN_ENV.to_string()).unwrap_or("development".to_string());
         let robots_txt = base_url.join("/robots.txt").unwrap();
         let robot_file_parser = RobotFileParser::new(robots_txt);
-        let client_opts =
-            SidekiqClientOpts { namespace: Some(maman_env.to_string()), ..Default::default() };
+        let client_opts = SidekiqClientOpts {
+            namespace: Some(maman_env.to_string()),
+            ..Default::default()
+        };
         let sidekiq = SidekiqClient::new(redis_pool, client_opts);
         Spider {
             base_url: base_url,
@@ -108,7 +110,8 @@ impl<'a> Spider<'a> {
     }
 
     fn can_visit(&self, page_url: &Url) -> bool {
-        self.robot_parser.can_fetch(maman_name!(), page_url.path())
+        self.robot_parser
+            .can_fetch(maman_name!(), page_url.path())
     }
 
     fn read_response(page_url: &Url, mut response: HttpResponse) -> Option<Page> {
@@ -132,7 +135,8 @@ impl<'a> Spider<'a> {
 
     fn load_url(url: &str) -> Option<HttpResponse> {
         let client = HttpClient::new().expect("HttpClient failed to construct");
-        let request = client.get(url)
+        let request = client
+            .get(url)
             .header(UserAgent(maman_user_agent!().to_owned()));
         match request.send() {
             Ok(response) => {
