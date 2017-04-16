@@ -23,6 +23,7 @@ use encoding::all::UTF_8;
 use url_serde::Serde;
 
 const MAMAN_ENV: &'static str = "MAMAN_ENV";
+const MAMAN_ENV_DEFAULT: &'static str = "development";
 
 pub struct Spider<'a> {
     pub base_url: Url,
@@ -36,7 +37,7 @@ pub struct Spider<'a> {
 
 impl<'a> Spider<'a> {
     pub fn new(redis_pool: RedisPool, base_url: Url, limit: isize) -> Spider<'a> {
-        let maman_env = env::var(&MAMAN_ENV.to_string()).unwrap_or("development".to_string());
+        let maman_env = env::var(&MAMAN_ENV.to_owned()).unwrap_or_else(|_| MAMAN_ENV_DEFAULT.to_owned());
         let robots_txt = base_url.join("/robots.txt").unwrap();
         let robot_file_parser = RobotFileParser::new(robots_txt);
         let client_opts = SidekiqClientOpts {
