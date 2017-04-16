@@ -138,9 +138,9 @@ impl<'a> Spider<'a> {
             .header(UserAgent(maman_user_agent!().to_owned()));
         match request.send() {
             Ok(response) => {
-                match response.status() {
-                    &StatusCode::Ok |
-                    &StatusCode::NotModified => Some(response),
+                match *response.status() {
+                    StatusCode::Ok |
+                    StatusCode::NotModified => Some(response),
                     _ => None,
                 }
             }
