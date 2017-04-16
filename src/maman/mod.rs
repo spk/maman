@@ -42,7 +42,6 @@ impl<'a> Spider<'a> {
         let robot_file_parser = RobotFileParser::new(robots_txt);
         let client_opts = SidekiqClientOpts {
             namespace: Some(maman_env.to_string()),
-            ..Default::default()
         };
         let sidekiq = SidekiqClient::new(redis_pool, client_opts);
         Spider {
