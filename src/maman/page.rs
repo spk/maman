@@ -18,25 +18,19 @@ impl TokenSink for Page {
     type Handle = ();
 
     fn process_token(&mut self, token: Token) -> TokenSinkResult<()> {
-        match token {
-            TagToken(tag) => {
-                match tag.name {
-                    local_name!("a") => {
-                        for attr in tag.attrs.iter() {
-                            if attr.name.local.to_string() == "href" {
-                                match self.can_enqueue(&attr.value) {
-                                    Some(u) => {
-                                        self.urls.push(Serde(u));
-                                    }
-                                    None => {}
-                                }
+        if let TagToken(tag) = token {
+            match tag.name {
+                local_name!("a") => {
+                    for attr in &tag.attrs {
+                        if attr.name.local.to_string() == "href" {
+                            if let Some(u) = self.can_enqueue(&attr.value) {
+                                self.urls.push(Serde(u));
                             }
                         }
                     }
-                    _ => {}
                 }
+                _ => {}
             }
-            _ => {}
         }
         TokenSinkResult::Continue
     }
