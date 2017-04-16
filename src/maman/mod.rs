@@ -61,11 +61,8 @@ impl<'a> Spider<'a> {
         for u in &page.urls {
             self.unvisited_urls.push(u.clone());
         }
-        match self.sidekiq.push(page.to_job()) {
-            Err(err) => {
-                error!("SidekiqClient push failed: {}", err);
-            }
-            Ok(_) => {}
+        if let Err(err) = self.sidekiq.push(page.to_job()) {
+            error!("SidekiqClient push failed: {}", err);
         }
     }
 
