@@ -17,6 +17,7 @@ pub struct Page {
 impl TokenSink for Page {
     type Handle = ();
 
+    #[cfg_attr(feature = "clippy", allow(single_match))]
     fn process_token(&mut self, token: Token) -> TokenSinkResult<()> {
         if let TagToken(tag) = token {
             match tag.name {
