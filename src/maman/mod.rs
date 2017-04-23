@@ -121,7 +121,11 @@ impl<'a> Spider<'a> {
         let _ = response.read_to_end(&mut document);
         match UTF_8.decode(&document, DecoderTrap::Ignore) {
             Ok(doc) => {
-                let page = Page::new(page_url.clone(), doc.to_string(), headers.clone());
+                let page = Page::new(page_url.clone(),
+                                     doc.to_string(),
+                                     headers.clone(),
+                                     response.status().to_string(),
+                                     response.version().to_string());
                 let read = Spider::read_page(page, &doc).unwrap();
                 Some(read)
             }
