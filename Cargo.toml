@@ -29,7 +29,7 @@ sidekiq = "0.6"
 encoding = "0.2"
 log = "0.3"
 env_logger = "0.3"
-clippy = { version = "=0.0.122", optional = true }
+clippy = { version = "=0.0.125", optional = true }
 
 [features]
 unstable = []
