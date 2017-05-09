@@ -1,5 +1,6 @@
 [package]
 name = "maman"
+# When updating version, also modify html_root_url in the src/lib.rs file.
 version = "0.11.0"
 authors = ["Laurent Arnoud <laurent@spkdev.net>"]
 description = "Rust Web Crawler"
@@ -29,7 +30,7 @@ sidekiq = "0.6"
 encoding = "0.2"
 log = "0.3"
 env_logger = "0.3"
-clippy = { version = "=0.0.125", optional = true }
+clippy = { version = "=0.0.131", optional = true }
 
 [features]
 unstable = []
