@@ -1,4 +1,14 @@
 
+0.12.0 / 2017-06-12
+===================
+
+  * Fix owned instance just for comparison
+  * Update deps serde 1.0
+  * Update clippy and add html_root_url
+  * Add http status and http version to page
+  * Less strict deps
+  * Add clippy check
+
 0.11.0 / 2017-03-12
 ===================
 
