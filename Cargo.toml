@@ -19,18 +19,18 @@ html5ever = "0.10"
 html5ever-atoms = "0.1"
 tendril = "0.2"
 string_cache = "0.2"
-serde = "0.9"
-serde_derive = "0.9"
-serde_json = "0.9"
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0"
 url = "1.4"
-url_serde = "0.1"
+url_serde = "0.2"
 hyper_serde = "0.6"
 robotparser = "0.8"
-sidekiq = "0.6"
+sidekiq = "0.7"
 encoding = "0.2"
 log = "0.3"
 env_logger = "0.3"
-clippy = { version = "=0.0.131", optional = true }
+clippy = { version = "0.0.*", optional = true }
 
 [features]
 unstable = []
