@@ -25,7 +25,7 @@ impl TokenSink for Page {
             match tag.name {
                 local_name!("a") => {
                     for attr in &tag.attrs {
-                        if attr.name.local.to_string() == "href" {
+                        if &*attr.name.local == "href" {
                             if let Some(u) = self.can_enqueue(&attr.value) {
                                 self.urls.push(Serde(u));
                             }
