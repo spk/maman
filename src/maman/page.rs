@@ -3,17 +3,17 @@ use std::collections::BTreeMap;
 
 use url::{Url, ParseError};
 use sidekiq::{Job, JobOpts, Value};
-use url_serde::Serde;
+use url_serde::Serde as UrlSerde;
 use html5ever::tokenizer::{TokenSink, Token, TagToken, TokenSinkResult};
 
 #[derive(Serialize, Debug)]
 pub struct Page {
-    pub url: Serde<Url>,
+    pub url: UrlSerde<Url>,
     pub document: String,
     pub headers: BTreeMap<String, String>,
     pub status: String,
     pub http_version: String,
-    pub urls: Vec<Serde<Url>>,
+    pub urls: Vec<UrlSerde<Url>>,
 }
 
 impl TokenSink for Page {
@@ -27,7 +27,7 @@ impl TokenSink for Page {
                     for attr in &tag.attrs {
                         if &*attr.name.local == "href" {
                             if let Some(u) = self.can_enqueue(&attr.value) {
-                                self.urls.push(Serde(u));
+                                self.urls.push(UrlSerde(u));
                             }
                         }
                     }
@@ -47,7 +47,7 @@ impl Page {
                http_version: String)
                -> Self {
         Page {
-            url: Serde(url),
+            url: UrlSerde(url),
             document: document,
             headers: headers,
             status: status,
