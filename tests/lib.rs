@@ -19,8 +19,7 @@ fn visit_page(input: &str) -> Spider {
     let page = Page::new(url,
                          input.to_string(),
                          BTreeMap::new(),
-                         "200 OK".to_string(),
-                         "HTTP/1.1".to_string());
+                         "200 OK".to_string());
     let tok = Spider::read_page(page, input);
     spider.visit_page(tok.unwrap());
     spider
@@ -76,8 +75,7 @@ fn test_json_job_format() {
     let page = Page::new(url,
                          input.to_string(),
                          headers.clone(),
-                         "200 OK".to_string(),
-                         "HTTP/1.1".to_string());
+                         "200 OK".to_string());
     let page_object = page.as_object();
     let job = page.to_job();
     assert_eq!(job.class, maman_name!());

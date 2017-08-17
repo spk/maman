@@ -12,7 +12,6 @@ pub struct Page {
     pub document: String,
     pub headers: BTreeMap<String, String>,
     pub status: String,
-    pub http_version: String,
     pub urls: Vec<UrlSerde<Url>>,
 }
 
@@ -43,15 +42,13 @@ impl Page {
     pub fn new(url: Url,
                document: String,
                headers: BTreeMap<String, String>,
-               status: String,
-               http_version: String)
+               status: String)
                -> Self {
         Page {
             url: UrlSerde(url),
             document: document,
             headers: headers,
             status: status,
-            http_version: http_version,
             urls: Vec::new(),
         }
     }
@@ -70,7 +67,6 @@ impl Page {
             "document": &self.document,
             "headers": &self.headers,
             "status": &self.status,
-            "http_version": &self.http_version,
             "urls": &self.urls,
         })
     }

@@ -9,7 +9,7 @@ use std::collections::BTreeMap;
 
 use url::Url;
 use reqwest::Client as HttpClient;
-use reqwest::header::UserAgent;
+use reqwest::header::{Headers, UserAgent};
 use reqwest::StatusCode;
 use reqwest::Response as HttpResponse;
 use robotparser::RobotFileParser;
@@ -124,8 +124,7 @@ impl<'a> Spider<'a> {
                 let page = Page::new(page_url.clone(),
                                      doc.to_string(),
                                      headers.clone(),
-                                     response.status().to_string(),
-                                     response.version().to_string());
+                                     response.status().to_string());
                 let read = Spider::read_page(page, &doc).unwrap();
                 Some(read)
             }
@@ -135,17 +134,22 @@ impl<'a> Spider<'a> {
 
     fn load_url(url: &str) -> Option<HttpResponse> {
         let client = HttpClient::new().expect("HttpClient failed to construct");
-        let request = client
-            .get(url)
-            .header(UserAgent(maman_user_agent!().to_owned()));
-        match request.send() {
-            Ok(response) => {
-                match *response.status() {
-                    StatusCode::Ok | StatusCode::NotModified => Some(response),
-                    _ => None,
+        let mut headers = Headers::new();
+        headers.set(UserAgent::new(maman_user_agent!().to_owned()));
+        match client.get(url) {
+            Err(_) => None,
+            Ok(mut request) => {
+                request.headers(headers);
+                match request.send() {
+                    Ok(response) => {
+                        match response.status() {
+                            StatusCode::Ok | StatusCode::NotModified => Some(response),
+                            _ => None,
+                        }
+                    }
+                    Err(_) => None,
                 }
             }
-            Err(_) => None,
         }
     }
 }
