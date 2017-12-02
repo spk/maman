@@ -63,6 +63,7 @@ impl<'a> Spider<'a> {
         }
     }
 
+    #[allow(unknown_lints, needless_pass_by_value)]
     pub fn visit_page(&mut self, page: Page) {
         self.visited_urls.push(page.url.clone());
         for u in &page.urls {
@@ -141,7 +142,7 @@ impl<'a> Spider<'a> {
         }
     }
 
-    fn load_url(url: &str, mime_types: &Vec<mime::Mime>) -> Option<HttpResponse> {
+    fn load_url(url: &str, mime_types: &[mime::Mime]) -> Option<HttpResponse> {
         let client = HttpClient::builder()
             .timeout(Duration::from_secs(5))
             .build().expect("HttpClient failed to construct");
@@ -150,12 +151,10 @@ impl<'a> Spider<'a> {
             Ok(response) => {
                 match response.status() {
                     StatusCode::Ok | StatusCode::NotModified => {
-                        if mime_types.is_empty() {
-                            Some(response)
-                        } else if mime_types.contains(response
-                                                          .headers()
-                                                          .get::<ContentType>()
-                                                          .unwrap()) {
+                        if mime_types.is_empty() || mime_types.contains(response
+                                                                        .headers()
+                                                                        .get::<ContentType>()
+                                                                        .unwrap()) {
                             Some(response)
                         } else {
                             None
