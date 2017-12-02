@@ -11,16 +11,14 @@
 
 #![crate_name = "maman"]
 
-extern crate string_cache;
 #[macro_use]
 extern crate log;
-extern crate html5ever;
 #[macro_use]
-extern crate html5ever_atoms;
-extern crate tendril;
+extern crate html5ever;
 extern crate url;
 extern crate url_serde;
 extern crate reqwest;
+extern crate mime;
 extern crate serde;
 #[macro_use]
 extern crate serde_json;

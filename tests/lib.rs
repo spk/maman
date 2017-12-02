@@ -15,13 +15,13 @@ fn visit_page(input: &str) -> Spider {
     env::set_var("MAMAN_ENV", "test");
     let url = Url::parse("https://example.net/").unwrap();
     let redis_pool = create_redis_pool().unwrap();
-    let mut spider = Spider::new(redis_pool, url.clone(), 0);
+    let mut spider = Spider::new(redis_pool, url.clone(), 0, Vec::new());
     let page = Page::new(url,
                          input.to_string(),
                          BTreeMap::new(),
                          "200 OK".to_string());
     let tok = Spider::read_page(page, input);
-    spider.visit_page(tok.unwrap());
+    spider.visit_page(tok.sink);
     spider
 }
 

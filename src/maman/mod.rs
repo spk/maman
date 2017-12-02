@@ -3,19 +3,21 @@ pub use self::page::Page;
 
 use std::env;
 use std::io::Read;
+use std::time::Duration;
 #[allow(unused_imports)]
 use std::ascii::AsciiExt;
 use std::default::Default;
 use std::collections::BTreeMap;
 
 use url::Url;
+use mime;
 use reqwest::Client as HttpClient;
-use reqwest::header::{Headers, UserAgent};
+use reqwest::header::{UserAgent, ContentType};
 use reqwest::StatusCode;
 use reqwest::Response as HttpResponse;
 use robotparser::RobotFileParser;
 use html5ever::tokenizer::Tokenizer;
-use html5ever::tokenizer::buffer_queue::BufferQueue;
+use html5ever::tokenizer::BufferQueue;
 use sidekiq::Client as SidekiqClient;
 use sidekiq::ClientOpts as SidekiqClientOpts;
 use sidekiq::RedisPool;
@@ -32,12 +34,17 @@ pub struct Spider<'a> {
     pub unvisited_urls: Vec<Serde<Url>>,
     pub env: String,
     pub limit: isize,
+    pub mime_types: Vec<mime::Mime>,
     sidekiq: SidekiqClient,
     robot_parser: RobotFileParser<'a>,
 }
 
 impl<'a> Spider<'a> {
-    pub fn new(redis_pool: RedisPool, base_url: Url, limit: isize) -> Spider<'a> {
+    pub fn new(redis_pool: RedisPool,
+               base_url: Url,
+               limit: isize,
+               mime_types: Vec<mime::Mime>)
+               -> Spider<'a> {
         let maman_env =
             env::var(&MAMAN_ENV.to_owned()).unwrap_or_else(|_| MAMAN_ENV_DEFAULT.to_owned());
         let robots_txt = base_url.join("/robots.txt").unwrap();
@@ -52,6 +59,7 @@ impl<'a> Spider<'a> {
             env: maman_env,
             robot_parser: robot_file_parser,
             limit: limit,
+            mime_types: mime_types,
         }
     }
 
@@ -68,12 +76,12 @@ impl<'a> Spider<'a> {
     pub fn crawl(&mut self) {
         self.robot_parser.read();
         let base_url = self.base_url.clone();
-        if let Some(response) = Spider::load_url(self.base_url.as_ref()) {
+        if let Some(response) = Spider::load_url(self.base_url.as_ref(), &self.mime_types) {
             self.visit(&base_url, response);
             while let Some(url) = self.unvisited_urls.pop() {
                 if self.continue_to_crawl() {
                     if !self.visited_urls.contains(&url) {
-                        if let Some(response) = Spider::load_url(url.as_ref()) {
+                        if let Some(response) = Spider::load_url(url.as_ref(), &self.mime_types) {
                             self.visit(&url, response);
                         }
                     }
@@ -126,29 +134,34 @@ impl<'a> Spider<'a> {
                                      doc.to_string(),
                                      headers.clone(),
                                      response.status().to_string());
-                let read = Spider::read_page(page, &doc).unwrap();
-                Some(read)
+                let read = Spider::read_page(page, &doc);
+                Some(read.sink)
             }
             Err(_) => None,
         }
     }
 
-    fn load_url(url: &str) -> Option<HttpResponse> {
-        let client = HttpClient::new().expect("HttpClient failed to construct");
-        let mut headers = Headers::new();
-        headers.set(UserAgent::new(maman_user_agent!().to_owned()));
-        match client.get(url) {
+    fn load_url(url: &str, mime_types: &Vec<mime::Mime>) -> Option<HttpResponse> {
+        let client = HttpClient::builder()
+            .timeout(Duration::from_secs(5))
+            .build().expect("HttpClient failed to construct");
+        match client.get(url).header(UserAgent::new(maman_user_agent!().to_owned())).send() {
             Err(_) => None,
-            Ok(mut request) => {
-                request.headers(headers);
-                match request.send() {
-                    Ok(response) => {
-                        match response.status() {
-                            StatusCode::Ok | StatusCode::NotModified => Some(response),
-                            _ => None,
+            Ok(response) => {
+                match response.status() {
+                    StatusCode::Ok | StatusCode::NotModified => {
+                        if mime_types.is_empty() {
+                            Some(response)
+                        } else if mime_types.contains(response
+                                                          .headers()
+                                                          .get::<ContentType>()
+                                                          .unwrap()) {
+                            Some(response)
+                        } else {
+                            None
                         }
                     }
-                    Err(_) => None,
+                    _ => None,
                 }
             }
         }
