@@ -3,6 +3,7 @@ pub use self::page::Page;
 
 use std::env;
 use std::io::Read;
+#[allow(unused_imports)]
 use std::ascii::AsciiExt;
 use std::default::Default;
 use std::collections::BTreeMap;
