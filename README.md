@@ -64,7 +64,7 @@ The MIT License
 Copyright (c) 2016-2017 Laurent Arnoud <laurent@spkdev.net>
 
 ---
-[![Build](https://img.shields.io/travis-ci/spk/maman.svg)](https://travis-ci.org/spk/maman)
+[![Build](https://img.shields.io/travis-ci/spk/maman/master.svg)](https://travis-ci.org/spk/maman)
 [![Version](https://img.shields.io/crates/v/maman.svg)](https://crates.io/crates/maman)
 [![Documentation](https://img.shields.io/badge/doc-rustdoc-blue.svg)](https://docs.rs/maman/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT "MIT")
