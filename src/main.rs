@@ -77,10 +77,12 @@ fn main() {
 
     match create_redis_pool() {
         Ok(redis_pool) => {
-            let mut spider = Spider::new(redis_pool,
-                                         fetch_url(env::args().nth(1)),
-                                         fetch_limit(env::args().nth(2)),
-                                         fetch_mime_types(env::args().nth(3)));
+            let mut spider = Spider::new(
+                redis_pool,
+                fetch_url(env::args().nth(1)),
+                fetch_limit(env::args().nth(2)),
+                fetch_mime_types(env::args().nth(3)),
+            );
             spider.crawl()
         }
         Err(err) => {

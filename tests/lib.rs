@@ -16,10 +16,12 @@ fn visit_page(input: &str) -> Spider {
     let url = Url::parse("https://example.net/").unwrap();
     let redis_pool = create_redis_pool().unwrap();
     let mut spider = Spider::new(redis_pool, url.clone(), 0, Vec::new());
-    let page = Page::new(url,
-                         input.to_string(),
-                         BTreeMap::new(),
-                         "200 OK".to_string());
+    let page = Page::new(
+        url,
+        input.to_string(),
+        BTreeMap::new(),
+        "200 OK".to_string(),
+    );
     let tok = Spider::read_page(page, input);
     spider.visit_page(tok.sink);
     spider
@@ -72,10 +74,12 @@ fn test_json_job_format() {
     let url = Url::parse("http://example.net/").unwrap();
     let mut headers = BTreeMap::new();
     headers.insert("content-type".to_string(), "text/html".to_string());
-    let page = Page::new(url,
-                         input.to_string(),
-                         headers.clone(),
-                         "200 OK".to_string());
+    let page = Page::new(
+        url,
+        input.to_string(),
+        headers.clone(),
+        "200 OK".to_string(),
+    );
     let page_object = page.as_object();
     let job = page.to_job();
     assert_eq!(job.class, maman_name!());

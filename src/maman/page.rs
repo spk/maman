@@ -39,11 +39,12 @@ impl TokenSink for Page {
 }
 
 impl Page {
-    pub fn new(url: Url,
-               document: String,
-               headers: BTreeMap<String, String>,
-               status: String)
-               -> Self {
+    pub fn new(
+        url: Url,
+        document: String,
+        headers: BTreeMap<String, String>,
+        status: String,
+    ) -> Self {
         Page {
             url: UrlSerde(url),
             document: document,

@@ -40,11 +40,12 @@ pub struct Spider<'a> {
 }
 
 impl<'a> Spider<'a> {
-    pub fn new(redis_pool: RedisPool,
-               base_url: Url,
-               limit: isize,
-               mime_types: Vec<mime::Mime>)
-               -> Spider<'a> {
+    pub fn new(
+        redis_pool: RedisPool,
+        base_url: Url,
+        limit: isize,
+        mime_types: Vec<mime::Mime>,
+    ) -> Spider<'a> {
         let maman_env =
             env::var(&MAMAN_ENV.to_owned()).unwrap_or_else(|_| MAMAN_ENV_DEFAULT.to_owned());
         let robots_txt = base_url.join("/robots.txt").unwrap();
@@ -116,8 +117,7 @@ impl<'a> Spider<'a> {
     }
 
     fn can_visit(&self, page_url: &Url) -> bool {
-        self.robot_parser
-            .can_fetch(maman_name!(), page_url.path())
+        self.robot_parser.can_fetch(maman_name!(), page_url.path())
     }
 
     fn read_response(page_url: &Url, mut response: HttpResponse) -> Option<Page> {
@@ -131,10 +131,12 @@ impl<'a> Spider<'a> {
         let _ = response.read_to_end(&mut document);
         match UTF_8.decode(&document, DecoderTrap::Ignore) {
             Ok(doc) => {
-                let page = Page::new(page_url.clone(),
-                                     doc.to_string(),
-                                     headers.clone(),
-                                     response.status().to_string());
+                let page = Page::new(
+                    page_url.clone(),
+                    doc.to_string(),
+                    headers.clone(),
+                    response.status().to_string(),
+                );
                 let read = Spider::read_page(page, &doc);
                 Some(read.sink)
             }
@@ -145,16 +147,19 @@ impl<'a> Spider<'a> {
     fn load_url(url: &str, mime_types: &[mime::Mime]) -> Option<HttpResponse> {
         let client = HttpClient::builder()
             .timeout(Duration::from_secs(5))
-            .build().expect("HttpClient failed to construct");
-        match client.get(url).header(UserAgent::new(maman_user_agent!().to_owned())).send() {
+            .build()
+            .expect("HttpClient failed to construct");
+        match client
+            .get(url)
+            .header(UserAgent::new(maman_user_agent!().to_owned()))
+            .send() {
             Err(_) => None,
             Ok(response) => {
                 match response.status() {
                     StatusCode::Ok | StatusCode::NotModified => {
-                        if mime_types.is_empty() || mime_types.contains(response
-                                                                        .headers()
-                                                                        .get::<ContentType>()
-                                                                        .unwrap()) {
+                        if mime_types.is_empty() ||
+                            mime_types.contains(response.headers().get::<ContentType>().unwrap())
+                        {
                             Some(response)
                         } else {
                             None
