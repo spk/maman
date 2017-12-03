@@ -11,10 +11,20 @@ script:
 
 matrix:
   include:
-    - rust: nightly
+    # Code lints
+    - os: linux
+      rust: nightly
       env: CLIPPY=1
       script:
         - cargo rustc --lib --features "lint" -- -Zno-trans
+    # Code formatting check
+    - os: linux
+      rust: stable
+      # skip the global install step
+      install:
+        - which cargo-install-update || cargo install cargo-update
+        - cargo install-update -i rustfmt
+      script: cargo fmt -- --write-mode=diff
 
 notifications:
   email:
