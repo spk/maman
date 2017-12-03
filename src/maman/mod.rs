@@ -22,8 +22,8 @@ use encoding::{Encoding, DecoderTrap};
 use encoding::all::UTF_8;
 use url_serde::Serde;
 
-const MAMAN_ENV: &'static str = "MAMAN_ENV";
-const MAMAN_ENV_DEFAULT: &'static str = "development";
+const MAMAN_ENV: &str = "MAMAN_ENV";
+const MAMAN_ENV_DEFAULT: &str = "development";
 
 pub struct Spider<'a> {
     pub base_url: Url,
