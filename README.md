@@ -41,7 +41,7 @@ PREFIX=~/.local make install
 ## Usage
 
 ~~~
-maman URL [LIMIT]
+maman URL [LIMIT] [MIME_TYPES]
 ~~~
 
 `LIMIT` must be an integer or `0` is the default, meaning no limit.
@@ -61,7 +61,7 @@ maman URL [LIMIT]
 
 The MIT License
 
-Copyright (c) 2016-2017 Laurent Arnoud <laurent@spkdev.net>
+Copyright (c) 2016-2018 Laurent Arnoud <laurent@spkdev.net>
 
 ---
 [![Build](https://img.shields.io/travis-ci/spk/maman/master.svg)](https://travis-ci.org/spk/maman)

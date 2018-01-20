@@ -32,7 +32,7 @@ uninstall: ## Uninstall
 	rm $(PREFIX)/bin/maman $(PREFIX)/share/$(MANPAGE)
 
 manpage: ## Generate manpage
-	@which a2x > /dev/null || { echo "asciidoc libxml2-utils xmlto docbook-xsl docbook-xml"; exit 1; }
-	@find doc/ -type f -exec a2x -d manpage -f manpage -D man/man1 {} \;
+	@which asciidoctor > /dev/null || { echo "install asciidoctor"; exit 1; }
+	@find doc/ -type f -exec asciidoctor -b manpage -D man/man1 {} \;
 
 .PHONY: all install clean uninstall help

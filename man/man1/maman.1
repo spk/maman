@@ -1,46 +1,39 @@
 '\" t
 .\"     Title: maman
-.\"    Author: [see the "AUTHOR" section]
-.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
-.\"      Date: 01/02/2017
+.\"    Author: [see the "AUTHORS" section]
+.\" Generator: Asciidoctor 1.5.6.1
+.\"      Date: 2018-01-20
 .\"    Manual: \ \&
 .\"    Source: \ \&
 .\"  Language: English
 .\"
-.TH "MAMAN" "1" "01/02/2017" "\ \&" "\ \&"
-.\" -----------------------------------------------------------------
-.\" * Define some portability stuff
-.\" -----------------------------------------------------------------
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" http://bugs.debian.org/507673
-.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.TH "MAMAN" "1" "2018-01-20" "\ \&" "\ \&"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
-.\" -----------------------------------------------------------------
-.\" * set default formatting
-.\" -----------------------------------------------------------------
-.\" disable hyphenation
+.ss \n[.ss] 0
 .nh
-.\" disable justification (adjust text to left margin only)
 .ad l
-.\" -----------------------------------------------------------------
-.\" * MAIN CONTENT STARTS HERE *
-.\" -----------------------------------------------------------------
+.de URL
+\\$2 \(laURL: \\$1 \(ra\\$3
+..
+.if \n[.g] .mso www.tmac
+.LINKSTYLE blue R < >
 .SH "NAME"
 maman \- Rust Web Crawler saving pages on Redis
 .SH "SYNOPSIS"
 .sp
-\fBmaman\fR URL [\fILIMIT\fR]
+\fBmaman\fP URL [\(aqLIMIT\(aq] [\(aqMIME_TYPES\(aq]
 .SH "DESCRIPTION"
 .sp
-Maman is a Rust Web Crawler saving pages on Redis\&. Pages are send to list <MAMAN_ENV>:queue:maman using Sidekiq job format
+Maman is a Rust Web Crawler saving pages on Redis.
+Pages are send to list <MAMAN_ENV>:queue:maman using
+.URL "https://github.com/mperham/sidekiq/wiki/Job\-Format" "Sidekiq job format" ""
 .SH "URL"
 .sp
-Must be a valid http url\&.
+Must be a valid http url.
 .SH "LIMIT"
 .sp
-Crawling limit must be an integer or 0 is the default, meaning no limit\&.
+Crawling limit must be an integer or 0 is the default, meaning no limit.
 .SH "ENVIRONMENT VARIABLES"
 .SS "Defaults"
 .sp
@@ -63,7 +56,7 @@ MAMAN_ENV=development
 .sp -1
 .IP \(bu 2.3
 .\}
-REDIS_URL="redis://127\&.0\&.0\&.1/"
+REDIS_URL="redis://127.0.0.1/"
 .RE
 .SS "Others"
 .sp
@@ -79,9 +72,10 @@ RUST_LOG=maman=info
 .RE
 .SH "AUTHOR"
 .sp
-Laurent Arnoud <laurent@spkdev\&.net>
+.MTO "laurent\(atspkdev.net" "Laurent Arnoud" ""
 .SH "LICENSE"
 .sp
 The MIT License
 .sp
-Copyright (c) 2016\-2017 Laurent Arnoud <laurent@spkdev\&.net>
+Copyright (c) 2016\-2018 \c
+.MTO "laurent\(atspkdev.net" "Laurent Arnoud" ""

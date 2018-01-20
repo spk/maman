@@ -6,7 +6,7 @@ maman - Rust Web Crawler saving pages on Redis
 
 == SYNOPSIS
 
-*maman* URL ['LIMIT']
+*maman* URL ['LIMIT'] ['MIME_TYPES']
 
 == DESCRIPTION
 
@@ -35,12 +35,12 @@ Crawling limit must be an integer or 0 is the default, meaning no limit.
 
 == AUTHOR
 
-Laurent Arnoud <laurent@spkdev.net>
+mailto:laurent@spkdev.net[Laurent Arnoud]
 
 == LICENSE
 
 The MIT License
 
-Copyright (c) 2016-2017 Laurent Arnoud <laurent@spkdev.net>
+Copyright (c) 2016-2018 mailto:laurent@spkdev.net[Laurent Arnoud]
 
 // vim: set syntax=asciidoc:
