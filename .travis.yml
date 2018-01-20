@@ -6,11 +6,14 @@ language: rust
 cache: cargo
 rust: stable
 
-script:
-  - cargo test -v
-
 matrix:
   include:
+    # Tests
+    - os: linux
+      rust: stable
+      env: UNIT=1
+      script:
+        - cargo test
     # Code lints
     - os: linux
       rust: nightly
@@ -19,11 +22,12 @@ matrix:
         - cargo rustc --lib --features "lint" -- -Zno-trans
     # Code formatting check
     - os: linux
-      rust: stable
+      rust: nightly
+      env: FMT=1
       # skip the global install step
       install:
         - which cargo-install-update || cargo install cargo-update
-        - cargo install-update -i rustfmt
+        - cargo install-update -i rustfmt-nightly
       script: cargo fmt -- --write-mode=diff
 
 notifications:
