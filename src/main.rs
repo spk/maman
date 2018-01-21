@@ -1,8 +1,8 @@
+extern crate env_logger;
 #[macro_use]
 extern crate log;
-extern crate env_logger;
-extern crate url;
 extern crate mime;
+extern crate url;
 
 #[macro_use]
 extern crate maman;
@@ -25,15 +25,13 @@ fn print_usage() {
 
 fn fetch_url(url_arg: Option<String>) -> Url {
     match url_arg {
-        Some(url) => {
-            match Url::parse(url.as_ref()) {
-                Ok(u) => return u,
-                Err(_) => {
-                    print_usage();
-                    process::exit(1);
-                }
+        Some(url) => match Url::parse(url.as_ref()) {
+            Ok(u) => return u,
+            Err(_) => {
+                print_usage();
+                process::exit(1);
             }
-        }
+        },
         None => {
             print_usage();
             process::exit(1);
@@ -43,12 +41,10 @@ fn fetch_url(url_arg: Option<String>) -> Url {
 
 fn fetch_limit(limit_arg: Option<String>) -> isize {
     match limit_arg {
-        Some(limit) => {
-            match limit.parse::<isize>() {
-                Err(_) => DEFAULT_LIMIT,
-                Ok(l) => l,
-            }
-        }
+        Some(limit) => match limit.parse::<isize>() {
+            Err(_) => DEFAULT_LIMIT,
+            Ok(l) => l,
+        },
         None => DEFAULT_LIMIT,
     }
 }

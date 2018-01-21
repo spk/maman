@@ -8,25 +8,24 @@
 #![deny(warnings)]
 #![cfg_attr(feature = "clippy", feature(plugin))]
 #![cfg_attr(feature = "clippy", plugin(clippy))]
-
 #![crate_name = "maman"]
 
-#[macro_use]
-extern crate log;
+extern crate encoding;
 #[macro_use]
 extern crate html5ever;
-extern crate url;
-extern crate url_serde;
-extern crate reqwest;
+#[macro_use]
+extern crate log;
 extern crate mime;
+extern crate reqwest;
+extern crate robotparser;
 extern crate serde;
 #[macro_use]
-extern crate serde_json;
-#[macro_use]
 extern crate serde_derive;
-extern crate robotparser;
+#[macro_use]
+extern crate serde_json;
 extern crate sidekiq;
-extern crate encoding;
+extern crate url;
+extern crate url_serde;
 
 #[macro_export]
 macro_rules! maman_name {
@@ -45,5 +44,5 @@ macro_rules! maman_user_agent {
     () => ( concat!(maman_version_string!(), " (https://crates.io/crates/maman)") )
 }
 
-pub use maman::{Spider, Page};
+pub use maman::{Page, Spider};
 pub mod maman;

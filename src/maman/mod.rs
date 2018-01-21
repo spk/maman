@@ -12,7 +12,7 @@ use std::collections::BTreeMap;
 use url::Url;
 use mime;
 use reqwest::Client as HttpClient;
-use reqwest::header::{UserAgent, ContentType};
+use reqwest::header::{ContentType, UserAgent};
 use reqwest::StatusCode;
 use reqwest::Response as HttpResponse;
 use robotparser::RobotFileParser;
@@ -21,7 +21,7 @@ use html5ever::tokenizer::BufferQueue;
 use sidekiq::Client as SidekiqClient;
 use sidekiq::ClientOpts as SidekiqClientOpts;
 use sidekiq::RedisPool;
-use encoding::{Encoding, DecoderTrap};
+use encoding::{DecoderTrap, Encoding};
 use encoding::all::UTF_8;
 use url_serde::Serde;
 
@@ -50,7 +50,9 @@ impl<'a> Spider<'a> {
             env::var(&MAMAN_ENV.to_owned()).unwrap_or_else(|_| MAMAN_ENV_DEFAULT.to_owned());
         let robots_txt = base_url.join("/robots.txt").unwrap();
         let robot_file_parser = RobotFileParser::new(robots_txt);
-        let client_opts = SidekiqClientOpts { namespace: Some(maman_env.to_string()) };
+        let client_opts = SidekiqClientOpts {
+            namespace: Some(maman_env.to_string()),
+        };
         let sidekiq = SidekiqClient::new(redis_pool, client_opts);
         Spider {
             base_url: base_url,
@@ -152,22 +154,21 @@ impl<'a> Spider<'a> {
         match client
             .get(url)
             .header(UserAgent::new(maman_user_agent!().to_owned()))
-            .send() {
+            .send()
+        {
             Err(_) => None,
-            Ok(response) => {
-                match response.status() {
-                    StatusCode::Ok | StatusCode::NotModified => {
-                        if mime_types.is_empty() ||
-                            mime_types.contains(response.headers().get::<ContentType>().unwrap())
-                        {
-                            Some(response)
-                        } else {
-                            None
-                        }
+            Ok(response) => match response.status() {
+                StatusCode::Ok | StatusCode::NotModified => {
+                    if mime_types.is_empty()
+                        || mime_types.contains(response.headers().get::<ContentType>().unwrap())
+                    {
+                        Some(response)
+                    } else {
+                        None
                     }
-                    _ => None,
                 }
-            }
+                _ => None,
+            },
         }
     }
 }

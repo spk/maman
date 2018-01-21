@@ -1,9 +1,9 @@
-extern crate url;
 #[macro_use]
 extern crate maman;
 extern crate sidekiq;
+extern crate url;
 
-use maman::{Spider, Page};
+use maman::{Page, Spider};
 use sidekiq::create_redis_pool;
 
 use std::env;
