@@ -53,14 +53,14 @@ impl<'a> Spider<'a> {
         };
         let sidekiq = SidekiqClient::new(redis_pool, client_opts);
         Spider {
-            base_url: base_url,
+            base_url,
             visited_urls: Vec::new(),
             unvisited_urls: Vec::new(),
-            sidekiq: sidekiq,
+            sidekiq,
             env: maman_env,
             robot_parser: robot_file_parser,
-            limit: limit,
-            mime_types: mime_types,
+            limit,
+            mime_types,
         }
     }
 

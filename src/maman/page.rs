@@ -45,9 +45,9 @@ impl Page {
     ) -> Self {
         Page {
             url: UrlSerde(url),
-            document: document,
-            headers: headers,
-            status: status,
+            document,
+            headers,
+            status,
             urls: Vec::new(),
         }
     }
