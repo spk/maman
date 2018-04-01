@@ -4,8 +4,6 @@ pub use self::page::Page;
 use std::env;
 use std::io::Read;
 use std::time::Duration;
-#[allow(unused_imports)]
-use std::ascii::AsciiExt;
 use std::default::Default;
 use std::collections::BTreeMap;
 
