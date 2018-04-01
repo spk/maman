@@ -69,7 +69,7 @@ fn fetch_mime_types(mime_types_arg: Option<String>) -> Vec<mime::Mime> {
 }
 
 fn main() {
-    env_logger::init().unwrap();
+    env_logger::init();
 
     match create_redis_pool() {
         Ok(redis_pool) => {
