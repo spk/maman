@@ -29,19 +29,27 @@ extern crate url_serde;
 
 #[macro_export]
 macro_rules! maman_name {
-    () => ( "Maman" )
+    () => {
+        "Maman"
+    };
 }
 #[macro_export]
 macro_rules! maman_version {
-    () => ( env!("CARGO_PKG_VERSION") )
+    () => {
+        env!("CARGO_PKG_VERSION")
+    };
 }
 #[macro_export]
 macro_rules! maman_version_string {
-    () => ( concat!(maman_name!(), " v", maman_version!()) )
+    () => {
+        concat!(maman_name!(), " v", maman_version!())
+    };
 }
 #[macro_export]
 macro_rules! maman_user_agent {
-    () => ( concat!(maman_version_string!(), " (https://crates.io/crates/maman)") )
+    () => {
+        concat!(maman_version_string!(), " (https://crates.io/crates/maman)")
+    };
 }
 
 pub use maman::{Page, Spider};
