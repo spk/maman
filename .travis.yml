@@ -4,31 +4,26 @@ services:
 
 language: rust
 cache: cargo
-rust: stable
+
+rust:
+  - nightly
+  - stable
 
 matrix:
   include:
-    # Tests
-    - os: linux
-      rust: stable
-      env: UNIT=1
-      script:
-        - cargo test
-    # Code lints
-    - os: linux
-      rust: nightly
-      env: CLIPPY=1
-      script:
-        - cargo rustc --lib --features "lint" -- -Zno-trans
-    # Code formatting check
-    - os: linux
-      rust: nightly
+    - rust: nightly
       env: FMT=1
-      # skip the global install step
       install:
         - which cargo-install-update || cargo install cargo-update
         - cargo install-update -i rustfmt-nightly
       script: cargo fmt -- --write-mode=diff
+    - rust: nightly
+      env: CLIPPY=1
+      script:
+        - cargo rustc --lib --features "lint" -- -Zno-trans
+  allow_failures:
+    - rust: nightly
+      env: CLIPPY=1
 
 notifications:
   email:
