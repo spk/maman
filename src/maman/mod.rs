@@ -157,12 +157,30 @@ impl<'a> Spider<'a> {
             Err(_) => None,
             Ok(response) => match response.status() {
                 StatusCode::Ok | StatusCode::NotModified => {
-                    if mime_types.is_empty()
-                        || mime_types.contains(response.headers().get::<ContentType>().unwrap())
-                    {
+                    if mime_types.is_empty() {
                         Some(response)
                     } else {
-                        None
+                        match response.headers().clone().get::<ContentType>() {
+                            Some(mime_type) => {
+                                let mime_str_without_charset =
+                                    match (mime_type.type_(), mime_type.subtype()) {
+                                        (type_, subtype) => {
+                                            let mut text = type_.to_string();
+                                            text.push_str("/");
+                                            text.push_str(subtype.as_ref());
+                                            text
+                                        }
+                                    };
+                                let mime_without_charset: mime::Mime =
+                                    mime_str_without_charset.parse().unwrap();
+                                if mime_types.contains(&mime_without_charset) {
+                                    Some(response)
+                                } else {
+                                    None
+                                }
+                            }
+                            None => None,
+                        }
                     }
                 }
                 _ => None,
