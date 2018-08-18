@@ -16,7 +16,7 @@ matrix:
       install:
         - which cargo-install-update || cargo install cargo-update
         - cargo install-update -i rustfmt-nightly
-      script: cargo fmt -- --write-mode=diff
+      script: cargo fmt -- --check
     - rust: nightly
       env: CLIPPY=1
       script:
