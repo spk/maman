@@ -24,7 +24,6 @@ url = "1.4"
 url_serde = "0.2"
 robotparser = "0.10"
 sidekiq = "0.8"
-encoding = "0.2"
 log = "0.4"
 env_logger = "0.5"
 clippy = { version = "*", optional = true }

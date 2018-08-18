@@ -2,7 +2,6 @@ mod page;
 pub use self::page::Page;
 
 use std::env;
-use std::io::Read;
 use std::time::Duration;
 use std::default::Default;
 use std::collections::BTreeMap;
@@ -19,8 +18,6 @@ use html5ever::tokenizer::BufferQueue;
 use sidekiq::Client as SidekiqClient;
 use sidekiq::ClientOpts as SidekiqClientOpts;
 use sidekiq::RedisPool;
-use encoding::{DecoderTrap, Encoding};
-use encoding::all::UTF_8;
 use url_serde::Serde;
 
 const MAMAN_ENV: &str = "MAMAN_ENV";
@@ -127,20 +124,18 @@ impl<'a> Spider<'a> {
                 headers.insert(h.name().to_ascii_lowercase(), h.value_string());
             }
         }
-        let mut document = vec![];
-        let _ = response.read_to_end(&mut document);
-        match UTF_8.decode(&document, DecoderTrap::Ignore) {
-            Ok(doc) => {
+        match response.text() {
+            Ok(content) => {
                 let page = Page::new(
                     page_url.clone(),
-                    doc.to_string(),
+                    content.to_string(),
                     headers.clone(),
                     response.status().to_string(),
-                );
-                let read = Spider::read_page(page, &doc);
+                    );
+                let read = Spider::read_page(page, &content);
                 Some(read.sink)
             }
-            Err(_) => None,
+            _ => None,
         }
     }
 

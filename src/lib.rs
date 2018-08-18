@@ -10,7 +10,6 @@
 #![cfg_attr(feature = "clippy", plugin(clippy))]
 #![crate_name = "maman"]
 
-extern crate encoding;
 #[macro_use]
 extern crate html5ever;
 #[macro_use]
