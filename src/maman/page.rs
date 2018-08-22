@@ -1,10 +1,10 @@
-use std::default::Default;
 use std::collections::BTreeMap;
+use std::default::Default;
 
-use url::{ParseError, Url};
-use sidekiq::{Job, JobOpts, Value};
-use url_serde::Serde as UrlSerde;
 use html5ever::tokenizer::{TagToken, Token, TokenSink, TokenSinkResult};
+use sidekiq::{Job, JobOpts, Value};
+use url::{ParseError, Url};
+use url_serde::Serde as UrlSerde;
 
 #[derive(Serialize, Debug)]
 pub struct Page {

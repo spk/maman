@@ -1,23 +1,23 @@
 mod page;
 pub use self::page::Page;
 
+use std::collections::BTreeMap;
+use std::default::Default;
 use std::env;
 use std::time::Duration;
-use std::default::Default;
-use std::collections::BTreeMap;
 
-use url::Url;
-use mime;
-use reqwest::Client as HttpClient;
-use reqwest::header::{ContentType, UserAgent};
-use reqwest::StatusCode;
-use reqwest::Response as HttpResponse;
-use robotparser::RobotFileParser;
-use html5ever::tokenizer::Tokenizer;
 use html5ever::tokenizer::BufferQueue;
+use html5ever::tokenizer::Tokenizer;
+use mime;
+use reqwest::header::{ContentType, UserAgent};
+use reqwest::Client as HttpClient;
+use reqwest::Response as HttpResponse;
+use reqwest::StatusCode;
+use robotparser::RobotFileParser;
 use sidekiq::Client as SidekiqClient;
 use sidekiq::ClientOpts as SidekiqClientOpts;
 use sidekiq::RedisPool;
+use url::Url;
 use url_serde::Serde;
 
 const MAMAN_ENV: &str = "MAMAN_ENV";
@@ -131,7 +131,7 @@ impl<'a> Spider<'a> {
                     content.to_string(),
                     headers.clone(),
                     response.status().to_string(),
-                    );
+                );
                 let read = Spider::read_page(page, &content);
                 Some(read.sink)
             }

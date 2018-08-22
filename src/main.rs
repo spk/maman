@@ -12,9 +12,9 @@ use std::env;
 use std::process;
 use std::str::FromStr;
 
-use url::Url;
 use maman::Spider;
 use sidekiq::create_redis_pool;
+use url::Url;
 
 const DEFAULT_LIMIT: isize = 0;
 

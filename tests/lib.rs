@@ -6,8 +6,8 @@ extern crate url;
 use maman::{Page, Spider};
 use sidekiq::create_redis_pool;
 
-use std::env;
 use std::collections::BTreeMap;
+use std::env;
 
 use url::Url;
 
