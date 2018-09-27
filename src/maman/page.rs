@@ -22,13 +22,15 @@ impl TokenSink for Page {
     fn process_token(&mut self, token: Token, _: u64) -> TokenSinkResult<()> {
         if let TagToken(tag) = token {
             match tag.name {
-                local_name!("a") => for attr in &tag.attrs {
-                    if &*attr.name.local == "href" {
-                        if let Some(u) = self.can_enqueue(&attr.value) {
-                            self.urls.push(UrlSerde(u));
+                local_name!("a") => {
+                    for attr in &tag.attrs {
+                        if &*attr.name.local == "href" {
+                            if let Some(u) = self.can_enqueue(&attr.value) {
+                                self.urls.push(UrlSerde(u));
+                            }
                         }
                     }
-                },
+                }
                 _ => {}
             }
         }

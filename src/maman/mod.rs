@@ -40,7 +40,7 @@ impl<'a> Spider<'a> {
         base_url: Url,
         limit: isize,
         mime_types: Vec<mime::Mime>,
-        ) -> Spider<'a> {
+    ) -> Spider<'a> {
         let maman_env =
             env::var(&MAMAN_ENV.to_owned()).unwrap_or_else(|_| MAMAN_ENV_DEFAULT.to_owned());
         let robots_txt = base_url.join("/robots.txt").unwrap();
@@ -121,7 +121,10 @@ impl<'a> Spider<'a> {
         let mut headers = BTreeMap::new();
         {
             for (key, value) in response.headers().iter() {
-                headers.insert(key.as_str().to_string(), value.to_str().unwrap_or("").to_string());
+                headers.insert(
+                    key.as_str().to_string(),
+                    value.to_str().unwrap_or("").to_string(),
+                );
             }
         }
         match response.text() {
@@ -131,7 +134,7 @@ impl<'a> Spider<'a> {
                     content.to_string(),
                     headers,
                     response.status().to_string(),
-                    );
+                );
                 let read = Spider::read_page(page, &content);
                 Some(read.sink)
             }
@@ -148,33 +151,32 @@ impl<'a> Spider<'a> {
             .get(url)
             .header(USER_AGENT, maman_user_agent!())
             .send()
-            {
-                Err(_) => None,
-                Ok(response) => match response.status() {
-                    StatusCode::OK | StatusCode::NOT_MODIFIED => {
-                        if mime_types.is_empty() {
-                            Some(response)
-                        } else {
-                            let content_type = response.headers().get(CONTENT_TYPE)
-                                .and_then(|value| {
-                                    value.to_str().ok()
-                                }).and_then(|value| {
-                                    value.parse::<mime::Mime>().ok()
-                                });
-                            match content_type {
-                                Some(ct) => {
-                                    if mime_types.contains(&ct) {
-                                        Some(response)
-                                    } else {
-                                        None
-                                    }
+        {
+            Err(_) => None,
+            Ok(response) => match response.status() {
+                StatusCode::OK | StatusCode::NOT_MODIFIED => {
+                    if mime_types.is_empty() {
+                        Some(response)
+                    } else {
+                        let content_type = response
+                            .headers()
+                            .get(CONTENT_TYPE)
+                            .and_then(|value| value.to_str().ok())
+                            .and_then(|value| value.parse::<mime::Mime>().ok());
+                        match content_type {
+                            Some(ct) => {
+                                if mime_types.contains(&ct) {
+                                    Some(response)
+                                } else {
+                                    None
                                 }
-                                None => None
                             }
+                            None => None,
                         }
                     }
-                    _ => None,
-                },
-            }
+                }
+                _ => None,
+            },
+        }
     }
 }
