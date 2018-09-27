@@ -14,7 +14,7 @@ readme = "README.md"
 travis-ci = { repository = "spk/maman" }
 
 [dependencies]
-reqwest = "0.8"
+reqwest = "0.9"
 mime = "0.3"
 html5ever = "0.22"
 serde = "1.0"

@@ -9,7 +9,7 @@ use std::time::Duration;
 use html5ever::tokenizer::BufferQueue;
 use html5ever::tokenizer::Tokenizer;
 use mime;
-use reqwest::header::{ContentType, UserAgent};
+use reqwest::header::{CONTENT_TYPE, USER_AGENT};
 use reqwest::Client as HttpClient;
 use reqwest::Response as HttpResponse;
 use reqwest::StatusCode;
@@ -40,7 +40,7 @@ impl<'a> Spider<'a> {
         base_url: Url,
         limit: isize,
         mime_types: Vec<mime::Mime>,
-    ) -> Spider<'a> {
+        ) -> Spider<'a> {
         let maman_env =
             env::var(&MAMAN_ENV.to_owned()).unwrap_or_else(|_| MAMAN_ENV_DEFAULT.to_owned());
         let robots_txt = base_url.join("/robots.txt").unwrap();
@@ -120,8 +120,8 @@ impl<'a> Spider<'a> {
     fn read_response(page_url: &Url, mut response: HttpResponse) -> Option<Page> {
         let mut headers = BTreeMap::new();
         {
-            for h in response.headers().iter() {
-                headers.insert(h.name().to_ascii_lowercase(), h.value_string());
+            for (key, value) in response.headers().iter() {
+                headers.insert(key.as_str().to_string(), value.to_str().unwrap_or("").to_string());
             }
         }
         match response.text() {
@@ -129,9 +129,9 @@ impl<'a> Spider<'a> {
                 let page = Page::new(
                     page_url.clone(),
                     content.to_string(),
-                    headers.clone(),
+                    headers,
                     response.status().to_string(),
-                );
+                    );
                 let read = Spider::read_page(page, &content);
                 Some(read.sink)
             }
@@ -146,40 +146,35 @@ impl<'a> Spider<'a> {
             .expect("HttpClient failed to construct");
         match client
             .get(url)
-            .header(UserAgent::new(maman_user_agent!().to_owned()))
+            .header(USER_AGENT, maman_user_agent!())
             .send()
-        {
-            Err(_) => None,
-            Ok(response) => match response.status() {
-                StatusCode::Ok | StatusCode::NotModified => {
-                    if mime_types.is_empty() {
-                        Some(response)
-                    } else {
-                        match response.headers().clone().get::<ContentType>() {
-                            Some(mime_type) => {
-                                let mime_str_without_charset =
-                                    match (mime_type.type_(), mime_type.subtype()) {
-                                        (type_, subtype) => {
-                                            let mut text = type_.to_string();
-                                            text.push_str("/");
-                                            text.push_str(subtype.as_ref());
-                                            text
-                                        }
-                                    };
-                                let mime_without_charset: mime::Mime =
-                                    mime_str_without_charset.parse().unwrap();
-                                if mime_types.contains(&mime_without_charset) {
-                                    Some(response)
-                                } else {
-                                    None
+            {
+                Err(_) => None,
+                Ok(response) => match response.status() {
+                    StatusCode::OK | StatusCode::NOT_MODIFIED => {
+                        if mime_types.is_empty() {
+                            Some(response)
+                        } else {
+                            let content_type = response.headers().get(CONTENT_TYPE)
+                                .and_then(|value| {
+                                    value.to_str().ok()
+                                }).and_then(|value| {
+                                    value.parse::<mime::Mime>().ok()
+                                });
+                            match content_type {
+                                Some(ct) => {
+                                    if mime_types.contains(&ct) {
+                                        Some(response)
+                                    } else {
+                                        None
+                                    }
                                 }
+                                None => None
                             }
-                            None => None,
                         }
                     }
-                }
-                _ => None,
-            },
-        }
+                    _ => None,
+                },
+            }
     }
 }
