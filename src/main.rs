@@ -26,7 +26,7 @@ fn print_usage() {
 fn fetch_url(url_arg: Option<String>) -> Url {
     match url_arg {
         Some(url) => match Url::parse(url.as_ref()) {
-            Ok(u) => return u,
+            Ok(u) => u,
             Err(_) => {
                 print_usage();
                 process::exit(1);
@@ -53,13 +53,10 @@ fn fetch_mime_types(mime_types_arg: Option<String>) -> Vec<mime::Mime> {
     let mut mime_types = Vec::new();
     match mime_types_arg {
         Some(mts) => {
-            let v: Vec<&str> = mts.split(" ").collect();
+            let v: Vec<&str> = mts.split(' ').collect();
             for m in v {
-                match mime::Mime::from_str(&m.as_ref()) {
-                    Ok(mime) => {
-                        mime_types.push(mime);
-                    }
-                    Err(_) => {}
+                if let Ok(mime) = mime::Mime::from_str(m) {
+                    mime_types.push(mime);
                 }
             }
             mime_types

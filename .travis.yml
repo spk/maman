@@ -20,7 +20,8 @@ matrix:
     - rust: nightly
       env: CLIPPY=1
       script:
-        - cargo rustc --lib --features "lint" -- -Zno-trans
+        - rustup component add clippy-preview
+        - cargo clippy -- -D warnings
   allow_failures:
     - rust: nightly
       env: CLIPPY=1

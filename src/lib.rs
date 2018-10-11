@@ -6,8 +6,7 @@
 //! * `REDIS_URL`="redis://127.0.0.1/"
 #![doc(html_root_url = "https://docs.rs/maman/0.12.1")]
 #![deny(warnings)]
-#![cfg_attr(feature = "clippy", feature(plugin))]
-#![cfg_attr(feature = "clippy", plugin(clippy))]
+#![cfg_attr(feature = "cargo-clippy", feature(tool_lints))]
 #![crate_name = "maman"]
 
 #[macro_use]
