@@ -61,7 +61,10 @@ impl<'a> Spider<'a> {
         }
     }
 
-    #[cfg_attr(feature = "cargo-clippy", allow(unknown_lints, clippy::needless_pass_by_value))]
+    #[cfg_attr(
+        feature = "cargo-clippy",
+        allow(unknown_lints, clippy::needless_pass_by_value)
+    )]
     pub fn visit_page(&mut self, page: Page) {
         self.visited_urls.push(page.url.clone());
         for u in &page.urls {
