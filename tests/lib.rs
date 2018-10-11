@@ -1,7 +1,8 @@
-#[macro_use]
-extern crate maman;
+extern crate mockito;
 extern crate sidekiq;
 extern crate url;
+#[macro_use]
+extern crate maman;
 
 use maman::{Page, Spider};
 use sidekiq::create_redis_pool;
@@ -86,4 +87,34 @@ fn test_json_job_format() {
     assert_eq!(job.retry, 25);
     assert_eq!(job.queue, maman_name!().to_string().to_lowercase());
     assert_eq!(job.args, vec![page_object]);
+}
+
+#[test]
+fn test_integration() {
+    use mockito::mock;
+    let _r = mock("GET", "/robots.txt")
+        .with_status(200)
+        .with_header("content-type", "text/plain")
+        .with_body("User-agent: *\nAllow: /")
+        .create();
+    let _m1 = mock("GET", "/")
+        .with_status(200)
+        .with_header("content-type", "text/html")
+        .with_body("<html><a href='/hello'>hello</a>")
+        .create();
+    let _m2 = mock("GET", "/hello")
+        .with_status(200)
+        .with_header("content-type", "text/html")
+        .with_body("<html><a href='/world'>world</a></html>")
+        .create();
+    let _m3 = mock("GET", "/world")
+        .with_status(200)
+        .with_header("content-type", "text/html")
+        .with_body("<html>!</html>")
+        .create();
+    let redis_pool = create_redis_pool().unwrap();
+    let url = Url::parse(mockito::SERVER_URL).unwrap();
+    let mut spider = Spider::new(redis_pool, url, 0, Vec::new());
+    spider.crawl();
+    assert_eq!(spider.visited_urls.len(), 3);
 }
