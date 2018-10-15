@@ -17,13 +17,13 @@ matrix:
         - which cargo-install-update || cargo install cargo-update
         - cargo install-update -i rustfmt-nightly
       script: cargo fmt -- --check
-    - rust: nightly
+    - rust: stable
       env: CLIPPY=1
       script:
         - rustup component add clippy-preview
         - cargo clippy -- -D warnings
   allow_failures:
-    - rust: nightly
+    - rust: stable
       env: CLIPPY=1
 
 notifications:
