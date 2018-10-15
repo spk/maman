@@ -26,11 +26,6 @@ robotparser = "0.10"
 sidekiq = "0.8"
 log = "0.4"
 env_logger = "0.5"
-clippy = { version = "*", optional = true }
 
 [dev-dependencies]
 mockito = "0.13"
-
-[features]
-unstable = []
-lint = ["clippy"]
