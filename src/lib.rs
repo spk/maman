@@ -4,7 +4,7 @@
 //!
 //! * `MAMAN_ENV`=development
 //! * `REDIS_URL`="redis://127.0.0.1/"
-#![doc(html_root_url = "https://docs.rs/maman/0.12.1")]
+#![doc(html_root_url = "https://docs.rs/maman/0.13.0")]
 #![deny(warnings)]
 #![cfg_attr(feature = "cargo-clippy", feature(tool_lints))]
 #![crate_name = "maman"]

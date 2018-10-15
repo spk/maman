@@ -1,4 +1,19 @@
 
+0.13.0 / 2018-10-15
+===================
+
+  * Use mockito for integration tests
+  * Update reqwest to 0.9
+  * Drop encoding crate already done in reqwest now
+  * Fix mime type filter when charset is present
+  * remove `use std::ascii::AsciiExt` for Rust 1.23
+  * Update env_logger to 0.5
+  * Update html5ever to 0.22
+  * Update to log and env_logger 0.4
+  * Update sidekiq to 0.8
+  * Add filter mime types and update deps
+  * Update reqwest to 0.7 and robotparser to 0.9
+
 0.12.1 / 2017-06-18
 ===================
 
