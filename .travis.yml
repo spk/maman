@@ -19,9 +19,10 @@ matrix:
       script: cargo fmt -- --check
     - rust: stable
       env: CLIPPY=1
-      script:
+      install:
         - rustup component add clippy-preview
-        - cargo clippy -- -D warnings
+      script:
+        - cargo clippy -- -D warnings -A single_match -A needless_pass_by_value
   allow_failures:
     - rust: stable
       env: CLIPPY=1
