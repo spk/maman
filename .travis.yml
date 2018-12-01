@@ -22,6 +22,10 @@ matrix:
         - rustup component add clippy-preview
       script:
         - cargo clippy -- -D warnings -A clippy::single_match -A clippy::needless_pass_by_value
+    - rust: stable
+      env: TEST=1
+      script:
+        - cargo test
   allow_failures:
     - rust: stable
       env: CLIPPY=1
