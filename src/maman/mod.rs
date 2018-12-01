@@ -163,16 +163,14 @@ impl<'a> Spider<'a> {
                             .get(CONTENT_TYPE)
                             .and_then(|value| value.to_str().ok())
                             .and_then(|value| value.parse::<mime::Mime>().ok())
-                            .and_then(|value|
-                                      match (value.type_(), value.subtype()) {
-                                          (type_, subtype) => {
-                                              let mut text = type_.to_string();
-                                              text.push_str("/");
-                                              text.push_str(subtype.as_ref());
-                                              mime::Mime::from_str(&text).ok()
-                                          }
-                                      }
-                            );
+                            .and_then(|value| match (value.type_(), value.subtype()) {
+                                (type_, subtype) => {
+                                    let mut text = type_.to_string();
+                                    text.push_str("/");
+                                    text.push_str(subtype.as_ref());
+                                    mime::Mime::from_str(&text).ok()
+                                }
+                            });
                         match content_type {
                             Some(ct) => {
                                 if mime_types.contains(&ct) {
