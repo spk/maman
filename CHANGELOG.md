@@ -1,4 +1,10 @@
 
+0.13.1 / 2018-12-01
+===================
+
+  * Fix mime filter when content type include charset
+  * Update env_logger and mockito
+
 0.13.0 / 2018-10-15
 ===================
 

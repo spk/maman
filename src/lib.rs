@@ -4,7 +4,7 @@
 //!
 //! * `MAMAN_ENV`=development
 //! * `REDIS_URL`="redis://127.0.0.1/"
-#![doc(html_root_url = "https://docs.rs/maman/0.13.0")]
+#![doc(html_root_url = "https://docs.rs/maman/0.13.1")]
 #![deny(warnings)]
 #![crate_name = "maman"]
 
