@@ -1,28 +1,27 @@
 ---
 services:
   - redis-server
-
 language: rust
 cache: cargo
 
 rust:
-  - nightly
   - stable
 
 matrix:
   include:
-    - rust: nightly
+    - rust: stable
       env: FMT=1
       install:
-        - which cargo-install-update || cargo install cargo-update
-        - cargo install-update -i rustfmt-nightly
-      script: cargo fmt -- --check
+      before_script:
+        - rustup component add rustfmt-preview
+      script:
+        - cargo fmt --all -- --check
     - rust: stable
       env: CLIPPY=1
-      install:
+      before_script:
         - rustup component add clippy-preview
       script:
-        - cargo clippy -- -D warnings -A single_match -A needless_pass_by_value
+        - cargo clippy -- -D warnings -A clippy::single_match -A clippy::needless_pass_by_value
   allow_failures:
     - rust: stable
       env: CLIPPY=1
