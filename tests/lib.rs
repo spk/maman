@@ -9,6 +9,7 @@ use sidekiq::create_redis_pool;
 
 use std::collections::BTreeMap;
 use std::env;
+use std::str::FromStr;
 
 use url::Url;
 
@@ -115,6 +116,36 @@ fn test_integration() {
     let redis_pool = create_redis_pool().unwrap();
     let url = Url::parse(mockito::SERVER_URL).unwrap();
     let mut spider = Spider::new(redis_pool, url, 0, Vec::new());
+    spider.crawl();
+    assert_eq!(spider.visited_urls.len(), 3);
+}
+
+#[test]
+fn test_integration_filter() {
+    use mockito::mock;
+    let _r = mock("GET", "/robots.txt")
+        .with_status(200)
+        .with_header("content-type", "text/plain")
+        .with_body("User-agent: *\nAllow: /")
+        .create();
+    let _m1 = mock("GET", "/")
+        .with_status(200)
+        .with_header("content-type", "text/html; charset=utf-8")
+        .with_body("<html><a href='/hello'>hello</a>")
+        .create();
+    let _m2 = mock("GET", "/hello")
+        .with_status(200)
+        .with_header("content-type", "text/html; charset=utf-8")
+        .with_body("<html><a href='/world'>world</a></html>")
+        .create();
+    let _m3 = mock("GET", "/world")
+        .with_status(200)
+        .with_header("content-type", "text/html; charset=utf-8")
+        .with_body("<html>!</html>")
+        .create();
+    let redis_pool = create_redis_pool().unwrap();
+    let url = Url::parse(mockito::SERVER_URL).unwrap();
+    let mut spider = Spider::new(redis_pool, url, 0, vec![mime::Mime::from_str("text/html").unwrap()]);
     spider.crawl();
     assert_eq!(spider.visited_urls.len(), 3);
 }
