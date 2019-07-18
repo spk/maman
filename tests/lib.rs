@@ -114,7 +114,7 @@ fn test_integration() {
         .with_body("<html>!</html>")
         .create();
     let redis_pool = create_redis_pool().unwrap();
-    let url = Url::parse(mockito::SERVER_URL).unwrap();
+    let url = Url::parse(&mockito::server_url()).unwrap();
     let mut spider = Spider::new(redis_pool, url, 0, Vec::new());
     spider.crawl();
     assert_eq!(spider.visited_urls.len(), 3);
@@ -144,7 +144,7 @@ fn test_integration_filter() {
         .with_body("<html>!</html>")
         .create();
     let redis_pool = create_redis_pool().unwrap();
-    let url = Url::parse(mockito::SERVER_URL).unwrap();
+    let url = Url::parse(&mockito::server_url()).unwrap();
     let mut spider = Spider::new(
         redis_pool,
         url,

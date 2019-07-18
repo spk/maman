@@ -13,13 +13,13 @@ matrix:
       env: FMT=1
       install:
       before_script:
-        - rustup component add rustfmt-preview
+        - rustup component add rustfmt
       script:
         - cargo fmt --all -- --check
     - rust: stable
       env: CLIPPY=1
       before_script:
-        - rustup component add clippy-preview
+        - rustup component add clippy
       script:
         - cargo clippy -- -D warnings -A clippy::single_match -A clippy::needless_pass_by_value
     - rust: stable

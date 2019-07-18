@@ -17,7 +17,7 @@ travis-ci = { repository = "spk/maman" }
 [dependencies]
 reqwest = "0.9"
 mime = "0.3"
-html5ever = "0.22"
+html5ever = "0.23"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
@@ -29,4 +29,4 @@ log = "0.4"
 env_logger = "0.6"
 
 [dev-dependencies]
-mockito = "0.14"
+mockito = "0.18"
