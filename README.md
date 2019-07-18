@@ -68,5 +68,4 @@ Copyright (c) 2016-2019 Laurent Arnoud <laurent@spkdev.net>
 [![Version](https://img.shields.io/crates/v/maman.svg)](https://crates.io/crates/maman)
 [![Documentation](https://img.shields.io/badge/doc-rustdoc-blue.svg)](https://docs.rs/maman/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT "MIT")
-[![Project status](https://img.shields.io/status/experimental.png?color=red)](https://github.com/spk/maman)
 [![Dependency status](https://deps.rs/repo/github/spk/maman/status.svg)](https://deps.rs/repo/github/spk/maman)
