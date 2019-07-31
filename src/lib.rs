@@ -22,7 +22,6 @@ extern crate serde_derive;
 extern crate serde_json;
 extern crate sidekiq;
 extern crate url;
-extern crate url_serde;
 
 #[macro_export]
 macro_rules! maman_name {

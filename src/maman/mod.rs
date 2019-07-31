@@ -19,15 +19,14 @@ use sidekiq::Client as SidekiqClient;
 use sidekiq::ClientOpts as SidekiqClientOpts;
 use sidekiq::RedisPool;
 use url::Url;
-use url_serde::Serde;
 
 const MAMAN_ENV: &str = "MAMAN_ENV";
 const MAMAN_ENV_DEFAULT: &str = "development";
 
 pub struct Spider<'a> {
     pub base_url: Url,
-    pub visited_urls: Vec<Serde<Url>>,
-    pub unvisited_urls: Vec<Serde<Url>>,
+    pub visited_urls: Vec<Url>,
+    pub unvisited_urls: Vec<Url>,
     pub env: String,
     pub limit: isize,
     pub mime_types: Vec<mime::Mime>,

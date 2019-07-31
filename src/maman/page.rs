@@ -4,15 +4,14 @@ use std::default::Default;
 use html5ever::tokenizer::{TagToken, Token, TokenSink, TokenSinkResult};
 use sidekiq::{Job, JobOpts, Value};
 use url::{ParseError, Url};
-use url_serde::Serde as UrlSerde;
 
 #[derive(Serialize, Debug)]
 pub struct Page {
-    pub url: UrlSerde<Url>,
+    pub url: Url,
     pub document: String,
     pub headers: BTreeMap<String, String>,
     pub status: String,
-    pub urls: Vec<UrlSerde<Url>>,
+    pub urls: Vec<Url>,
 }
 
 impl TokenSink for Page {
@@ -25,7 +24,7 @@ impl TokenSink for Page {
                     for attr in &tag.attrs {
                         if &*attr.name.local == "href" {
                             if let Some(u) = self.can_enqueue(&attr.value) {
-                                self.urls.push(UrlSerde(u));
+                                self.urls.push(u);
                             }
                         }
                     }
@@ -45,7 +44,7 @@ impl Page {
         status: String,
     ) -> Self {
         Page {
-            url: UrlSerde(url),
+            url: url,
             document,
             headers,
             status,
