@@ -44,7 +44,7 @@ impl Page {
         status: String,
     ) -> Self {
         Page {
-            url: url,
+            url,
             document,
             headers,
             status,
