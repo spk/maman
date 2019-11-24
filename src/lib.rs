@@ -48,5 +48,5 @@ macro_rules! maman_user_agent {
     };
 }
 
-pub use maman::{Page, Spider};
+pub use crate::maman::{Page, Spider};
 pub mod maman;
