@@ -16,7 +16,7 @@ travis-ci = { repository = "spk/maman" }
 
 [dependencies]
 env_logger = "0.7"
-html5ever = "0.24"
+html5ever = "0.25"
 log = "0.4"
 mime = "0.3"
 reqwest = "0.9"
