@@ -21,7 +21,7 @@ matrix:
       before_script:
         - rustup component add clippy
       script:
-        - cargo clippy -- -D warnings -A clippy::single_match -A clippy::needless_pass_by_value
+        - cargo clippy -- -D warnings
     - rust: stable
       env: TEST=1
       script:
