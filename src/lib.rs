@@ -8,7 +8,6 @@
 #![deny(warnings)]
 #![crate_name = "maman"]
 
-#[macro_use]
 extern crate html5ever;
 #[macro_use]
 extern crate log;

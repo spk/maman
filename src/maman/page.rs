@@ -17,19 +17,16 @@ pub struct Page {
 impl TokenSink for Page {
     type Handle = ();
 
-    fn process_token(&mut self, token: Token, _: u64) -> TokenSinkResult<()> {
+    fn process_token(&mut self, token: Token, _: u64) -> TokenSinkResult<Self::Handle> {
         if let TagToken(tag) = token {
-            match tag.name {
-                local_name!("a") => {
-                    for attr in &tag.attrs {
-                        if &*attr.name.local == "href" {
-                            if let Some(u) = self.can_enqueue(&attr.value) {
-                                self.urls.push(u);
-                            }
+            if tag.name.as_ref() == "a" {
+                for attr in &tag.attrs {
+                    if attr.name.local.as_ref() == "href" {
+                        if let Some(u) = self.can_enqueue(&attr.value) {
+                            self.urls.push(u);
                         }
                     }
                 }
-                _ => {}
             }
         }
         TokenSinkResult::Continue
