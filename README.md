@@ -32,7 +32,7 @@ Pages are send to list `<MAMAN_ENV>:queue:maman` using
 cargo install maman
 ```
 
-### With make
+### With [just](https://github.com/casey/just)
 
 ```
 PREFIX=~/.local just install
