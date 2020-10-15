@@ -161,8 +161,9 @@ impl<'a> Spider<'a> {
                             .get(CONTENT_TYPE)
                             .and_then(|value| value.to_str().ok())
                             .and_then(|value| value.parse::<mime::Mime>().ok())
-                            .and_then(|value| match (value.type_(), value.subtype()) {
-                                (type_, subtype) => {
+                            .and_then(|value| {
+                                let (type_, subtype) = (value.type_(), value.subtype());
+                                {
                                     let mut text = type_.to_string();
                                     text.push_str("/");
                                     text.push_str(subtype.as_ref());
