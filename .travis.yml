@@ -31,9 +31,6 @@ matrix:
         - cargo install just
       script:
         - just test
-  allow_failures:
-    - rust: stable
-      env: CLIPPY=1
 
 notifications:
   email:
