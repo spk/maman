@@ -1,6 +1,6 @@
 ---
 services:
-  - redis-server
+  - redis
 language: rust
 cache: cargo
 
@@ -11,21 +11,26 @@ matrix:
   include:
     - rust: stable
       env: FMT=1
-      install:
+      before_install:
+        - cargo install just
       before_script:
         - rustup component add rustfmt
       script:
-        - cargo fmt --all -- --check
+        - just format
     - rust: stable
       env: CLIPPY=1
+      before_install:
+        - cargo install just
       before_script:
         - rustup component add clippy
       script:
-        - cargo clippy -- -D warnings
+        - just lint
     - rust: stable
       env: TEST=1
+      before_install:
+        - cargo install just
       script:
-        - cargo test
+        - just test
   allow_failures:
     - rust: stable
       env: CLIPPY=1

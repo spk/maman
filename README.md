@@ -28,21 +28,21 @@ Pages are send to list `<MAMAN_ENV>:queue:maman` using
 
 ### With cargo
 
-~~~
+```
 cargo install maman
-~~~
+```
 
 ### With make
 
-~~~
-PREFIX=~/.local make install
-~~~
+```
+PREFIX=~/.local just install
+```
 
 ## Usage
 
-~~~
+```
 maman URL [LIMIT] [MIME_TYPES]
-~~~
+```
 
 `LIMIT` must be an integer or `0` is the default, meaning no limit.
 
@@ -61,7 +61,7 @@ maman URL [LIMIT] [MIME_TYPES]
 
 The MIT License
 
-Copyright (c) 2016-2019 Laurent Arnoud <laurent@spkdev.net>
+Copyright (c) 2016-2020 Laurent Arnoud <laurent@spkdev.net>
 
 ---
 [![Build](https://img.shields.io/travis/spk/maman/master.svg)](https://travis-ci.org/spk/maman)

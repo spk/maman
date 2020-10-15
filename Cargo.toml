@@ -9,8 +9,8 @@ homepage = "https://github.com/spk/maman"
 keywords = ["http", "web", "crawler", "spider"]
 license = "MIT"
 readme = "README.md"
-exclude = ["Makefile", "rustfmt.toml"]
 edition = "2018"
+exclude = ["Justfile", "rustfmt.toml"]
 
 [badges]
 travis-ci = { repository = "spk/maman" }
