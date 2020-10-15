@@ -9,7 +9,6 @@ use std::time::Duration;
 
 use html5ever::tokenizer::BufferQueue;
 use html5ever::tokenizer::Tokenizer;
-use mime;
 use reqwest::header::{CONTENT_TYPE, USER_AGENT};
 use reqwest::Client as HttpClient;
 use reqwest::Response as HttpResponse;
