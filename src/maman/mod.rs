@@ -165,7 +165,7 @@ impl<'a> Spider<'a> {
                                 let (type_, subtype) = (value.type_(), value.subtype());
                                 {
                                     let mut text = type_.to_string();
-                                    text.push_str("/");
+                                    text.push('/');
                                     text.push_str(subtype.as_ref());
                                     mime::Mime::from_str(&text).ok()
                                 }
