@@ -61,10 +61,11 @@ maman URL [LIMIT] [MIME_TYPES]
 
 The MIT License
 
-Copyright (c) 2016-2020 Laurent Arnoud <laurent@spkdev.net>
+Copyright (c) 2016-2021 Laurent Arnoud <laurent@spkdev.net>
 
 ---
 [![Build](https://img.shields.io/travis/spk/maman/master.svg)](https://travis-ci.org/spk/maman)
+[![Build](https://img.shields.io/github/workflow/status/spk/maman/CI/master.svg)](https://github.com/spk/maman/actions)
 [![Version](https://img.shields.io/crates/v/maman.svg)](https://crates.io/crates/maman)
 [![Documentation](https://img.shields.io/badge/doc-rustdoc-blue.svg)](https://docs.rs/maman/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT "MIT")
