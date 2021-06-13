@@ -16,7 +16,7 @@ exclude = ["Justfile", "rustfmt.toml"]
 travis-ci = { repository = "spk/maman" }
 
 [dependencies]
-env_logger = "0.7"
+env_logger = "0.8"
 html5ever = "0.25"
 log = "0.4"
 mime = "0.3"
@@ -25,8 +25,8 @@ robotparser = "0.10"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
-sidekiq = "0.8"
+sidekiq = "0.9"
 url = { version = "2.0", features = ["serde"] }
 
 [dev-dependencies]
-mockito = "0.23"
+mockito = "0.30"
