@@ -76,12 +76,7 @@ fn test_json_job_format() {
     let url = Url::parse("http://example.net/").unwrap();
     let mut headers = BTreeMap::new();
     headers.insert("content-type".to_string(), "text/html".to_string());
-    let page = Page::new(
-        url,
-        input.to_string(),
-        headers.clone(),
-        "200 OK".to_string(),
-    );
+    let page = Page::new(url, input.to_string(), headers, "200 OK".to_string());
     let page_object = page.as_object();
     let job = page.to_job();
     assert_eq!(job.class, maman_name!());
